@@ -59,6 +59,19 @@
     opacity: 0.9;
   }
 
+  .nav-link {
+    display: inline-block;
+    margin-top: 12px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--leaf-light);
+    text-decoration: none;
+    border: 1px solid var(--leaf-light);
+    border-radius: 20px;
+    padding: 6px 14px;
+  }
+
   .howto {
     margin: 18px 16px;
     background: var(--leaf);
@@ -296,6 +309,56 @@
 
   .rain-row input[type="text"]:focus { outline: none; border-color: var(--wet); }
 
+  .rain-event {
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--sand);
+  }
+
+  .rain-event:first-child { padding-top: 0; }
+  .rain-event:last-of-type { border-bottom: none; }
+
+  .rain-event-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .rain-event-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .remove-event-btn {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--danger);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 6px;
+  }
+
+  .add-event-btn {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--wet);
+    background: var(--sand-light);
+    border: 1px dashed var(--wet);
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+  }
+
   .rain-intensity { display: flex; gap: 6px; flex: 1; }
 
   .rain-intensity .mini-btn { border-color: var(--sand); }
@@ -531,6 +594,7 @@
   <div class="eyebrow">North Tampa &middot; Monday, July 13 &middot; 7:30am round</div>
   <h1>Moisture Check</h1>
   <div class="sub">Log each individual plant &mdash; groups can read differently plant to plant</div>
+  <a class="nav-link" href="metrics.html">View Patterns &amp; Metrics &rarr;</a>
 </header>
 
 <div class="scale">
@@ -558,22 +622,8 @@
     <button class="rain-btn yes-rain" id="rainYesBtn" onclick="setRainOccurred(true)">Rained</button>
   </div>
   <div class="rain-details" id="rainDetails">
-    <div class="rain-row">
-      <label>Start time</label>
-      <input type="text" id="rainTime" placeholder="e.g. 2:15pm">
-    </div>
-    <div class="rain-row">
-      <label>Duration</label>
-      <input type="text" id="rainDuration" placeholder="e.g. 20 min">
-    </div>
-    <div class="rain-row">
-      <label>Intensity</label>
-      <div class="rain-intensity">
-        <button class="mini-btn" data-intensity="Light">Light</button>
-        <button class="mini-btn" data-intensity="Moderate">Moderate</button>
-        <button class="mini-btn" data-intensity="Heavy">Heavy</button>
-      </div>
-    </div>
+    <div id="rainEventsContainer"></div>
+    <button class="add-event-btn" id="addRainEventBtn" onclick="addRainEvent()">+ Add another rain event</button>
   </div>
 </div>
 
@@ -798,16 +848,14 @@
     saveState(state);
   });
 
-  const rainTimeEl = document.getElementById('rainTime');
-  const rainDurationEl = document.getElementById('rainDuration');
   const rainDetailsEl = document.getElementById('rainDetails');
   const rainNoBtn = document.getElementById('rainNoBtn');
   const rainYesBtn = document.getElementById('rainYesBtn');
-  const intensityBtns = document.querySelectorAll('.rain-intensity .mini-btn');
+  const rainEventsContainer = document.getElementById('rainEventsContainer');
 
   function getRainState() {
     const state = loadState();
-    return state.rain || { occurred: false, time: '', duration: '', intensity: '' };
+    return state.rain || { occurred: false, events: [] };
   }
 
   function saveRainState(rain) {
@@ -822,50 +870,87 @@
     rainDetailsEl.classList.toggle('open', occurred);
     const rain = getRainState();
     rain.occurred = occurred;
+    if (occurred && rain.events.length === 0) {
+      rain.events.push({ time: '', duration: '', intensity: '' });
+    }
+    saveRainState(rain);
+    renderRainEvents(rain.events);
+  }
+
+  function addRainEvent() {
+    const rain = getRainState();
+    rain.events.push({ time: '', duration: '', intensity: '' });
+    saveRainState(rain);
+    renderRainEvents(rain.events);
+  }
+
+  function removeRainEvent(idx) {
+    const rain = getRainState();
+    rain.events.splice(idx, 1);
+    if (rain.events.length === 0) rain.events.push({ time: '', duration: '', intensity: '' });
+    saveRainState(rain);
+    renderRainEvents(rain.events);
+  }
+
+  function updateRainEventField(idx, field, value) {
+    const rain = getRainState();
+    rain.events[idx][field] = value;
     saveRainState(rain);
   }
 
-  function setRainIntensity(val) {
-    intensityBtns.forEach(b => b.classList.toggle('active', b.dataset.intensity === val));
-    const rain = getRainState();
-    rain.intensity = val;
-    saveRainState(rain);
+  function renderRainEvents(events) {
+    rainEventsContainer.innerHTML = '';
+    events.forEach((ev, idx) => {
+      const div = document.createElement('div');
+      div.className = 'rain-event';
+      div.innerHTML =
+        '<div class="rain-event-head">' +
+          '<span class="rain-event-label">Event #' + (idx + 1) + '</span>' +
+          (events.length > 1 ? '<button class="remove-event-btn" data-idx="' + idx + '">Remove</button>' : '') +
+        '</div>' +
+        '<div class="rain-row"><label>Start time</label><input type="text" class="rain-time-input" placeholder="e.g. 2:15pm" value="' + (ev.time || '').replace(/"/g,'&quot;') + '"></div>' +
+        '<div class="rain-row"><label>Duration</label><input type="text" class="rain-duration-input" placeholder="e.g. 20 min" value="' + (ev.duration || '').replace(/"/g,'&quot;') + '"></div>' +
+        '<div class="rain-row"><label>Intensity</label><div class="rain-intensity">' +
+          '<button class="mini-btn' + (ev.intensity === 'Light' ? ' active' : '') + '" data-intensity="Light">Light</button>' +
+          '<button class="mini-btn' + (ev.intensity === 'Moderate' ? ' active' : '') + '" data-intensity="Moderate">Moderate</button>' +
+          '<button class="mini-btn' + (ev.intensity === 'Heavy' ? ' active' : '') + '" data-intensity="Heavy">Heavy</button>' +
+        '</div></div>';
+      rainEventsContainer.appendChild(div);
+
+      div.querySelector('.rain-time-input').addEventListener('input', (e) => updateRainEventField(idx, 'time', e.target.value));
+      div.querySelector('.rain-duration-input').addEventListener('input', (e) => updateRainEventField(idx, 'duration', e.target.value));
+      div.querySelectorAll('.rain-intensity .mini-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          div.querySelectorAll('.rain-intensity .mini-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          updateRainEventField(idx, 'intensity', btn.dataset.intensity);
+        });
+      });
+      const removeBtn = div.querySelector('.remove-event-btn');
+      if (removeBtn) removeBtn.addEventListener('click', () => removeRainEvent(idx));
+    });
   }
-
-  intensityBtns.forEach(btn => {
-    btn.addEventListener('click', () => setRainIntensity(btn.dataset.intensity));
-  });
-
-  rainTimeEl.addEventListener('input', () => {
-    const rain = getRainState();
-    rain.time = rainTimeEl.value;
-    saveRainState(rain);
-  });
-
-  rainDurationEl.addEventListener('input', () => {
-    const rain = getRainState();
-    rain.duration = rainDurationEl.value;
-    saveRainState(rain);
-  });
 
   (function restoreRain() {
     const rain = getRainState();
     rainNoBtn.classList.toggle('active', !rain.occurred);
     rainYesBtn.classList.toggle('active', !!rain.occurred);
     rainDetailsEl.classList.toggle('open', !!rain.occurred);
-    rainTimeEl.value = rain.time || '';
-    rainDurationEl.value = rain.duration || '';
-    intensityBtns.forEach(b => b.classList.toggle('active', b.dataset.intensity === rain.intensity));
+    renderRainEvents(rain.events.length ? rain.events : [{ time: '', duration: '', intensity: '' }]);
   })();
 
   function rainSummaryLine() {
     const rain = getRainState();
-    if (!rain.occurred) return 'No rain logged';
-    const parts = [];
-    if (rain.time) parts.push('started ' + rain.time);
-    if (rain.duration) parts.push(rain.duration);
-    if (rain.intensity) parts.push(rain.intensity.toLowerCase());
-    return 'Rained' + (parts.length ? ' \u2014 ' + parts.join(', ') : '');
+    if (!rain.occurred || rain.events.length === 0) return 'No rain logged';
+    const lines = rain.events.map((ev, i) => {
+      const parts = [];
+      if (ev.time) parts.push('started ' + ev.time);
+      if (ev.duration) parts.push(ev.duration);
+      if (ev.intensity) parts.push(ev.intensity.toLowerCase());
+      const label = rain.events.length > 1 ? 'Rain #' + (i + 1) : 'Rained';
+      return label + (parts.length ? ' \u2014 ' + parts.join(', ') : '');
+    });
+    return lines.join(' / ');
   }
 
   function updateCardSummary(card, summaryEl) {
@@ -907,19 +992,24 @@
   }
 
   function resetAll() {
-    const { water, hold, skip, unlogged } = collectResults();
+    const { water, hold, skip, unlogged, raw } = collectResults();
     const mgNotes = document.getElementById('monkeygrassNotes').value.trim();
     const totalLogged = water.length + hold.length + skip.length;
+    const rainState = getRainState();
 
     if (totalLogged > 0) {
       const history = loadHistory();
       history.unshift({
         label: sessionLabel(),
+        timestamp: Date.now(),
         water: water.map(w => w.text + (w.separate ? ' (separate track)' : '')),
         hold, skip, unlogged, mgNotes,
-        rain: rainSummaryLine()
+        rain: rainSummaryLine(),
+        rainOccurred: !!rainState.occurred,
+        rainEvents: rainState.occurred ? rainState.events : [],
+        raw
       });
-      saveHistory(history.slice(0, 60));
+      saveHistory(history.slice(0, 90));
     }
 
     document.querySelectorAll('.mini-btn').forEach(b => b.classList.remove('active'));
@@ -932,10 +1022,8 @@
     document.getElementById('resultsPanel').classList.remove('open');
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     setRainOccurred(false);
-    rainTimeEl.value = '';
-    rainDurationEl.value = '';
-    intensityBtns.forEach(b => b.classList.remove('active'));
-    saveRainState({ occurred: false, time: '', duration: '', intensity: '' });
+    saveRainState({ occurred: false, events: [] });
+    renderRainEvents([{ time: '', duration: '', intensity: '' }]);
     updateProgress();
   }
 
@@ -987,6 +1075,7 @@
 
   function collectResults() {
     const water = [], hold = [], skip = [], unlogged = [];
+    const raw = {};
     document.querySelectorAll('.plant-card').forEach(card => {
       const plant = card.dataset.plant;
       const plantName = card.querySelector('.plant-name').childNodes[0].textContent.trim();
@@ -995,13 +1084,16 @@
         const label = row.querySelector('.instance-label').textContent;
         const active = row.querySelector('.mini-btn.active');
         const display = plantName + ' ' + label;
+        const key = row.dataset.key;
         if (!active) { unlogged.push(display); return; }
-        if (active.classList.contains('red')) water.push({ text: display, separate: SEPARATE_TRACK[plant] });
-        else if (active.classList.contains('green')) hold.push(display);
-        else if (active.classList.contains('blue')) skip.push(display);
+        let zone = null;
+        if (active.classList.contains('red')) { zone = 0; water.push({ text: display, separate: SEPARATE_TRACK[plant] }); }
+        else if (active.classList.contains('green')) { zone = 1; hold.push(display); }
+        else if (active.classList.contains('blue')) { zone = 2; skip.push(display); }
+        if (key && zone !== null) raw[key] = { plant, plantName, label, zone };
       });
     });
-    return { water, hold, skip, unlogged };
+    return { water, hold, skip, unlogged, raw };
   }
 
   function showResults() {
