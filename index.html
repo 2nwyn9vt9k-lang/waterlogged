@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monday Moisture Check</title>
+<style>
+  :root {
+    --soil: #4a3728;
+    --bark: #6b5544;
+    --leaf: #4d6b4f;
+    --leaf-light: #7a9c7d;
+    --sand: #e8ddc9;
+    --sand-light: #f5f0e4;
+    --clay: #b5754f;
+    --danger: #a3492f;
+    --paper: #fffdf9;
+    --ink: #2e2620;
+    --ink-soft: #6b5f52;
+    --dry: #a3492f;
+    --moist: #4d6b4f;
+    --wet: #3b6a8a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--sand-light);
+    color: var(--ink);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    padding: 0 0 50px 0;
+  }
+
+  header {
+    background: var(--soil);
+    color: var(--sand-light);
+    padding: 26px 20px 20px 20px;
+    text-align: center;
+    border-bottom: 4px solid var(--clay);
+  }
+
+  header .eyebrow {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--leaf-light);
+    margin-bottom: 6px;
+  }
+
+  header h1 { margin: 0; font-size: 24px; font-weight: 400; }
+
+  header .sub {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    color: var(--sand);
+    margin-top: 8px;
+    opacity: 0.9;
+  }
+
+  .howto {
+    margin: 18px 16px;
+    background: var(--leaf);
+    color: var(--paper);
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .howto .t {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--leaf-light);
+    margin-bottom: 8px;
+  }
+
+  .howto ol { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.6; }
+  .howto li { margin-bottom: 6px; }
+  .howto li:last-child { margin-bottom: 0; }
+
+  .scale {
+    display: flex;
+    margin: 16px 16px 4px 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-align: center;
+    color: white;
+  }
+  .scale div { flex: 1; padding: 8px 4px; }
+  .scale .r { background: var(--dry); }
+  .scale .g { background: var(--moist); }
+  .scale .b { background: var(--wet); }
+
+  h2.section-title {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 24px 16px 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #progressLabel { font-weight: 700; color: var(--leaf); }
+
+  section.plants { padding: 0 16px; }
+
+  .plant-card {
+    background: var(--paper);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    border: 1px solid var(--sand);
+  }
+
+  .plant-head { padding: 12px 16px 10px 16px; background: var(--sand); }
+
+  .plant-name { font-size: 16px; font-weight: 700; color: var(--soil); }
+
+  .plant-meta {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .probe-note {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    padding: 8px 16px 4px 16px;
+    line-height: 1.4;
+  }
+
+  .canary {
+    display: inline-block;
+    background: var(--leaf);
+    color: var(--paper);
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    margin-left: 6px;
+    font-weight: 700;
+  }
+
+  .risk-tag {
+    display: inline-block;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-left: 6px;
+  }
+  .risk-high { background: #f0d3c8; color: var(--danger); }
+  .risk-med { background: #f0e2c8; color: var(--clay); }
+
+  .instance-list { border-top: 1px solid var(--sand); }
+
+  .instance-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 16px 6px 16px;
+  }
+
+  .instance-label {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--soil);
+    flex: 0 0 60px;
+  }
+
+  .mini-btns { display: flex; gap: 5px; flex: 1; }
+
+  .mini-btn {
+    flex: 1;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 7px 2px;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    background: var(--sand-light);
+    color: var(--ink-soft);
+  }
+
+  .mini-btn.red { border-color: var(--dry); }
+  .mini-btn.green { border-color: var(--moist); }
+  .mini-btn.blue { border-color: var(--wet); }
+  .mini-btn.red.active { background: var(--dry); color: white; }
+  .mini-btn.green.active { background: var(--moist); color: white; }
+  .mini-btn.blue.active { background: var(--wet); color: white; }
+
+  .instance-result {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px;
+    line-height: 1.4;
+    padding: 0 16px 10px 76px;
+    display: none;
+  }
+
+  .instance-result.show { display: block; }
+  .instance-result.action-water { color: var(--danger); }
+  .instance-result.action-hold { color: var(--leaf); }
+  .instance-result.action-skip { color: var(--wet); }
+
+  .instance-row:last-of-type { padding-bottom: 12px; }
+
+  .card-summary {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    padding: 8px 16px;
+    background: var(--sand-light);
+    border-top: 1px solid var(--sand);
+    min-height: 14px;
+  }
+
+  .footer-note {
+    margin: 20px 16px 0 16px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .reset-btn {
+    display: block;
+    margin: 18px auto 0 auto;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--paper);
+    background: var(--bark);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  #resultsBtn { background: var(--leaf); margin-top: 22px; }
+
+  .results-panel {
+    display: none;
+    margin: 16px 16px 0 16px;
+    background: var(--paper);
+    border: 2px solid var(--leaf);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .results-panel.open { display: block; }
+
+  .results-head {
+    background: var(--leaf);
+    color: var(--paper);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .results-title {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .copy-btn {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--leaf);
+    background: var(--paper);
+    border: none;
+    padding: 7px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .copy-btn.copied { background: var(--sand); }
+
+  .results-body { padding: 4px 16px 14px 16px; font-family: 'Helvetica Neue', Arial, sans-serif; }
+
+  .results-group { margin-top: 14px; }
+
+  .results-group:first-child { margin-top: 12px; }
+
+  .results-group-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .results-group-title.water { color: var(--danger); }
+  .results-group-title.hold { color: var(--leaf); }
+  .results-group-title.skip { color: var(--wet); }
+
+  .results-item {
+    font-size: 13px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--sand);
+  }
+
+  .results-item:last-child { border-bottom: none; }
+
+  .results-empty {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-style: italic;
+    padding: 10px 0;
+  }
+
+  .results-note {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--sand);
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">North Tampa &middot; Monday, July 13 &middot; 7:30am round</div>
+  <h1>Moisture Check</h1>
+  <div class="sub">Log each individual plant &mdash; groups can read differently plant to plant</div>
+</header>
+
+<div class="scale">
+  <div class="r">1&ndash;3 RED<br>Dry</div>
+  <div class="g">4&ndash;7 GREEN<br>Moist</div>
+  <div class="b">8&ndash;10 BLUE<br>Wet</div>
+</div>
+
+<div class="howto">
+  <div class="t">How to Probe</div>
+  <ol>
+    <li>Insert 3&ndash;4" deep at the <strong>edge of the root ball</strong> &mdash; not dead center, not touching the stem.</li>
+    <li>For this weekend's transplants, that edge is where the original nursery soil meets the surrounding sand &mdash; that's the true test of whether water is reaching roots.</li>
+    <li>Center-of-root-ball readings run falsely wet right after planting (still-saturated nursery mix) &mdash; don't probe there.</li>
+    <li><strong>Blueberries:</strong> probe only inside each plant's amended acid pocket, never the surrounding native sand.</li>
+    <li><strong>Firespike cutting:</strong> skip the soil probe entirely &mdash; check the rooting medium surface by feel/sight, no roots yet to read.</li>
+  </ol>
+</div>
+
+<h2 class="section-title">
+  <span>Weekend Plantings</span>
+  <span id="progressLabel">0 / 0 logged</span>
+</h2>
+
+<section class="plants" id="plantList">
+
+  <div class="plant-card" data-plant="firebush">
+    <div class="plant-head">
+      <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span></div>
+      <div class="plant-meta">Planted Fri &middot; day 3</div>
+    </div>
+    <div class="probe-note">Probe at root ball edge, 3&ndash;4" deep. Log each plant separately &mdash; a smaller or edge plant can dry faster than the others.</div>
+    <div class="instance-list" data-labels="#1,#2,#3"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="blueberries">
+    <div class="plant-head">
+      <div class="plant-name">Blueberries <span class="risk-tag risk-high">High risk</span></div>
+      <div class="plant-meta">Planted Fri &middot; day 3 &middot; amended acid pocket only</div>
+    </div>
+    <div class="probe-note">Probe inside each plant's own amended pocket only &mdash; never the surrounding sand.</div>
+    <div class="instance-list" data-labels="#1,#2"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="pentas">
+    <div class="plant-head">
+      <div class="plant-name">Pentas</div>
+      <div class="plant-meta">Planted Sat &middot; day 2</div>
+    </div>
+    <div class="probe-note">Probe at root ball edge, 2&ndash;3" deep. End-of-row plants often dry faster than middle ones.</div>
+    <div class="instance-list" data-labels="#1,#2,#3,#4,#5"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="bluedaze">
+    <div class="plant-head">
+      <div class="plant-name">Blue Daze <span class="canary">Bed canary</span></div>
+      <div class="plant-meta">Planted Sat &middot; day 2</div>
+    </div>
+    <div class="probe-note">Check #1 first &mdash; if it reads dry, the whole bed likely is, and you can move faster through the rest.</div>
+    <div class="instance-list" data-labels="#1,#2,#3,#4,#5"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="coontie">
+    <div class="plant-head">
+      <div class="plant-name">Coontie <span class="risk-tag risk-high">Rot risk</span></div>
+      <div class="plant-meta">Planted Sat &middot; day 2</div>
+    </div>
+    <div class="probe-note">Probe at root ball edge. When in doubt, treat as GREEN and skip watering.</div>
+    <div class="instance-list" data-labels="#1,#2"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="monkeygrass">
+    <div class="plant-head">
+      <div class="plant-name">Monkey Grass Ring</div>
+      <div class="plant-meta">Relocated Sun &middot; day 1</div>
+    </div>
+    <div class="probe-note">One continuous planting, not individual plants &mdash; spot-check 3 points around the ring, 2&ndash;3" deep.</div>
+    <div class="instance-list" data-labels="Spot A,Spot B,Spot C"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="lemon">
+    <div class="plant-head">
+      <div class="plant-name">Small Lemon Tree</div>
+      <div class="plant-meta">Planted this weekend</div>
+    </div>
+    <div class="probe-note">Probe at root ball edge, 3&ndash;4" deep.</div>
+    <div class="instance-list" data-labels="#1"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="firespike">
+    <div class="plant-head">
+      <div class="plant-name">Firespike Cutting <span class="risk-tag risk-med">Different rule</span></div>
+      <div class="plant-meta">Rooting in-ground, no root system yet</div>
+    </div>
+    <div class="probe-note">No soil probe here &mdash; check rooting medium surface by feel/sight only.</div>
+    <div class="instance-list" data-labels="#1" data-dwm="1"></div>
+    <div class="card-summary"></div>
+  </div>
+
+</section>
+
+<button class="reset-btn" id="resultsBtn" onclick="showResults()">Show Today's Watering Results</button>
+
+<div class="results-panel" id="resultsPanel">
+  <div class="results-head">
+    <div class="results-title">Watering Plan &mdash; Mon 7/13</div>
+    <button class="copy-btn" onclick="copyResults()" id="copyBtn">Copy for partner</button>
+  </div>
+  <div id="resultsBody" class="results-body"></div>
+</div>
+
+<button class="reset-btn" onclick="resetAll()">Reset all readings</button>
+
+<div class="footer-note">
+  Coontie and blueberries stay on separate watering tracks &mdash; don't fold their readings into the general bed decision.
+</div>
+
+<script>
+  const RULES = {
+    firebush:    { red: "action-water", redText: "Water now. Soak the root zone, not the whole bed.",
+                   green: "action-hold", greenText: "Hold off &mdash; recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Too wet &mdash; watch for yellowing lower leaves or soft stem base." },
+    blueberries: { red: "action-water", redText: "Deep soak this plant's amended pocket only.",
+                   green: "action-hold", greenText: "Hold &mdash; on track for the 2-3x/week schedule.",
+                   blue: "action-skip", blueText: "Skip. Yellow leaves with green veins later = pH stress, not water." },
+    pentas:      { red: "action-water", redText: "Water now, shallow soak (2-3\").",
+                   green: "action-hold", greenText: "Hold off &mdash; recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry out before next check." },
+    bluedaze:    { red: "action-water", redText: "Water now &mdash; and check the rest of the bed too, dry canary means dry bed.",
+                   green: "action-hold", greenText: "Hold. Bed likely fine overall.",
+                   blue: "action-skip", blueText: "Skip watering across the bed for this round." },
+    coontie:     { red: "action-water", redText: "Only if truly dry at the root edge &mdash; deep soak, separate track.",
+                   green: "action-hold", greenText: "Hold. This is the target zone &mdash; leave it alone.",
+                   blue: "action-skip", blueText: "Skip. Coontie tolerates dry far better than wet &mdash; do not water." },
+    monkeygrass: { red: "action-water", redText: "Optional light water &mdash; monkey grass is tough, browning tips will tell you if it's truly stressed.",
+                   green: "action-hold", greenText: "Hold, likely fine to skip this check entirely.",
+                   blue: "action-skip", blueText: "Skip." },
+    lemon:       { red: "action-water", redText: "Water now, soak at root ball edge.",
+                   green: "action-hold", greenText: "Hold off &mdash; recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check." },
+    firespike:   { red: "action-water", redText: "Lightly moisten the rooting medium &mdash; don't soak.",
+                   green: "action-hold", greenText: "Good &mdash; evenly moist is the target, leave it.",
+                   blue: "action-skip", blueText: "Ease up. Check stem base for blackening/mushiness before adding more." }
+  };
+
+  const ZONE_LABELS_STD = ['RED', 'GREEN', 'BLUE'];
+  const ZONE_LABELS_DWM = ['DRY', 'MOIST', 'WET'];
+
+  document.querySelectorAll('.plant-card').forEach(card => {
+    const plant = card.dataset.plant;
+    const rule = RULES[plant];
+    const listEl = card.querySelector('.instance-list');
+    const labels = listEl.dataset.labels.split(',');
+    const zoneLabels = listEl.dataset.dwm ? ZONE_LABELS_DWM : ZONE_LABELS_STD;
+    const summaryEl = card.querySelector('.card-summary');
+
+    labels.forEach(label => {
+      const row = document.createElement('div');
+      row.className = 'instance-row';
+      row.innerHTML =
+        '<div class="instance-label">' + label + '</div>' +
+        '<div class="mini-btns">' +
+          '<button class="mini-btn red">' + zoneLabels[0] + '</button>' +
+          '<button class="mini-btn green">' + zoneLabels[1] + '</button>' +
+          '<button class="mini-btn blue">' + zoneLabels[2] + '</button>' +
+        '</div>';
+      listEl.appendChild(row);
+
+      const resultEl = document.createElement('div');
+      resultEl.className = 'instance-result';
+      listEl.appendChild(resultEl);
+
+      const buttons = row.querySelectorAll('.mini-btn');
+      buttons.forEach((btn, i) => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          resultEl.classList.remove('action-water', 'action-hold', 'action-skip');
+          if (i === 0) { resultEl.classList.add(rule.red); resultEl.textContent = rule.redText; }
+          if (i === 1) { resultEl.classList.add(rule.green); resultEl.textContent = rule.greenText; }
+          if (i === 2) { resultEl.classList.add(rule.blue); resultEl.textContent = rule.blueText; }
+          resultEl.classList.add('show');
+          updateCardSummary(card, summaryEl);
+          updateProgress();
+        });
+      });
+    });
+  });
+
+  function updateCardSummary(card, summaryEl) {
+    const total = card.querySelectorAll('.instance-row').length;
+    const logged = card.querySelectorAll('.instance-result.show').length;
+    if (logged === 0) { summaryEl.textContent = ''; return; }
+    const needsWater = card.querySelectorAll('.mini-btn.red.active').length;
+    let msg = logged + '/' + total + ' logged';
+    if (needsWater > 0) msg += ' \u2014 ' + needsWater + ' need water';
+    else if (logged === total) msg += ' \u2014 none need water this round';
+    summaryEl.textContent = msg;
+  }
+
+  function updateProgress() {
+    const total = document.querySelectorAll('.instance-row').length;
+    const logged = document.querySelectorAll('.instance-result.show').length;
+    document.getElementById('progressLabel').textContent = logged + ' / ' + total + ' logged';
+  }
+
+  function resetAll() {
+    document.querySelectorAll('.mini-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.instance-result').forEach(r => {
+      r.classList.remove('show', 'action-water', 'action-hold', 'action-skip');
+      r.textContent = '';
+    });
+    document.querySelectorAll('.card-summary').forEach(s => s.textContent = '');
+    document.getElementById('resultsPanel').classList.remove('open');
+    updateProgress();
+  }
+
+  const SEPARATE_TRACK = { blueberries: true, coontie: true };
+
+  function collectResults() {
+    const water = [], hold = [], skip = [], unlogged = [];
+    document.querySelectorAll('.plant-card').forEach(card => {
+      const plant = card.dataset.plant;
+      const plantName = card.querySelector('.plant-name').childNodes[0].textContent.trim();
+      const rows = card.querySelectorAll('.instance-row');
+      rows.forEach(row => {
+        const label = row.querySelector('.instance-label').textContent;
+        const active = row.querySelector('.mini-btn.active');
+        const display = plantName + ' ' + label;
+        if (!active) { unlogged.push(display); return; }
+        if (active.classList.contains('red')) water.push({ text: display, separate: SEPARATE_TRACK[plant] });
+        else if (active.classList.contains('green')) hold.push(display);
+        else if (active.classList.contains('blue')) skip.push(display);
+      });
+    });
+    return { water, hold, skip, unlogged };
+  }
+
+  function showResults() {
+    const { water, hold, skip, unlogged } = collectResults();
+    const body = document.getElementById('resultsBody');
+    let html = '';
+
+    html += '<div class="results-group">';
+    html += '<div class="results-group-title water">Water Today (' + water.length + ')</div>';
+    if (water.length === 0) {
+      html += '<div class="results-empty">Nothing reading dry right now.</div>';
+    } else {
+      water.forEach(w => {
+        html += '<div class="results-item">' + w.text + (w.separate ? ' <em>(separate track &mdash; own pocket)</em>' : '') + '</div>';
+      });
+    }
+    html += '</div>';
+
+    html += '<div class="results-group">';
+    html += '<div class="results-group-title hold">Hold Off (' + hold.length + ')</div>';
+    html += hold.length === 0
+      ? '<div class="results-empty">None in the moist range yet.</div>'
+      : hold.map(h => '<div class="results-item">' + h + '</div>').join('');
+    html += '</div>';
+
+    html += '<div class="results-group">';
+    html += '<div class="results-group-title skip">Skip &mdash; Too Wet (' + skip.length + ')</div>';
+    html += skip.length === 0
+      ? '<div class="results-empty">None reading wet.</div>'
+      : skip.map(s => '<div class="results-item">' + s + '</div>').join('');
+    html += '</div>';
+
+    if (unlogged.length > 0) {
+      html += '<div class="results-note">Not checked yet: ' + unlogged.join(', ') + '</div>';
+    }
+
+    body.innerHTML = html;
+    document.getElementById('resultsPanel').classList.add('open');
+    document.getElementById('resultsPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function buildShareText() {
+    const { water, hold, skip, unlogged } = collectResults();
+    let t = 'Watering Plan \u2014 Mon 7/13 (7:30am check)\n\n';
+    t += 'WATER TODAY (' + water.length + ')\n';
+    t += water.length ? water.map(w => '- ' + w.text + (w.separate ? ' (own pocket, separate track)' : '')).join('\n') : '- none';
+    t += '\n\nHOLD OFF (' + hold.length + ')\n';
+    t += hold.length ? hold.map(h => '- ' + h).join('\n') : '- none';
+    t += '\n\nSKIP, TOO WET (' + skip.length + ')\n';
+    t += skip.length ? skip.map(s => '- ' + s).join('\n') : '- none';
+    if (unlogged.length) t += '\n\nNot checked yet: ' + unlogged.join(', ');
+    return t;
+  }
+
+  function copyResults() {
+    const text = buildShareText();
+    const btn = document.getElementById('copyBtn');
+    const done = () => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy for partner'; btn.classList.remove('copied'); }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+
+  function fallbackCopy(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    done();
+  }
+
+  updateProgress();
+</script>
+
+</body>
+</html>
