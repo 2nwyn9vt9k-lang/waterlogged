@@ -534,6 +534,21 @@
   const ZONE_LABELS_STD = ['RED', 'GREEN', 'BLUE'];
   const ZONE_LABELS_DWM = ['DRY', 'MOIST', 'WET'];
 
+  const STORAGE_KEY = 'gardenMoistureCheck_2026-07-13';
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : { readings: {}, notes: {} };
+    } catch (e) {
+      return { readings: {}, notes: {} };
+    }
+  }
+
+  function saveState(state) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
   document.querySelectorAll('.plant-card').forEach(card => {
     const plant = card.dataset.plant;
     const rule = RULES[plant];
@@ -542,9 +557,11 @@
     const zoneLabels = listEl.dataset.dwm ? ZONE_LABELS_DWM : ZONE_LABELS_STD;
     const summaryEl = card.querySelector('.card-summary');
 
-    labels.forEach(label => {
+    labels.forEach((label, idx) => {
+      const key = plant + '-' + idx;
       const row = document.createElement('div');
       row.className = 'instance-row';
+      row.dataset.key = key;
       row.innerHTML =
         '<div class="instance-label">' + label + '</div>' +
         '<div class="mini-btns">' +
@@ -558,21 +575,44 @@
       resultEl.className = 'instance-result';
       listEl.appendChild(resultEl);
 
-      const buttons = row.querySelectorAll('.mini-btn');
-      buttons.forEach((btn, i) => {
+      const applyZone = (i) => {
+        const buttons = row.querySelectorAll('.mini-btn');
+        buttons.forEach(b => b.classList.remove('active'));
+        buttons[i].classList.add('active');
+        resultEl.classList.remove('action-water', 'action-hold', 'action-skip');
+        if (i === 0) { resultEl.classList.add(rule.red); resultEl.textContent = rule.redText; }
+        if (i === 1) { resultEl.classList.add(rule.green); resultEl.textContent = rule.greenText; }
+        if (i === 2) { resultEl.classList.add(rule.blue); resultEl.textContent = rule.blueText; }
+        resultEl.classList.add('show');
+      };
+
+      row.querySelectorAll('.mini-btn').forEach((btn, i) => {
         btn.addEventListener('click', () => {
-          buttons.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          resultEl.classList.remove('action-water', 'action-hold', 'action-skip');
-          if (i === 0) { resultEl.classList.add(rule.red); resultEl.textContent = rule.redText; }
-          if (i === 1) { resultEl.classList.add(rule.green); resultEl.textContent = rule.greenText; }
-          if (i === 2) { resultEl.classList.add(rule.blue); resultEl.textContent = rule.blueText; }
-          resultEl.classList.add('show');
+          applyZone(i);
           updateCardSummary(card, summaryEl);
           updateProgress();
+          const state = loadState();
+          state.readings[key] = i;
+          saveState(state);
         });
       });
+
+      const saved = loadState();
+      if (saved.readings.hasOwnProperty(key)) {
+        applyZone(saved.readings[key]);
+      }
     });
+
+    updateCardSummary(card, summaryEl);
+  });
+
+  const mgNotesEl = document.getElementById('monkeygrassNotes');
+  const savedForNotes = loadState();
+  if (savedForNotes.notes.monkeygrass) mgNotesEl.value = savedForNotes.notes.monkeygrass;
+  mgNotesEl.addEventListener('input', () => {
+    const state = loadState();
+    state.notes.monkeygrass = mgNotesEl.value;
+    saveState(state);
   });
 
   function updateCardSummary(card, summaryEl) {
@@ -599,7 +639,9 @@
       r.textContent = '';
     });
     document.querySelectorAll('.card-summary').forEach(s => s.textContent = '');
+    document.getElementById('monkeygrassNotes').value = '';
     document.getElementById('resultsPanel').classList.remove('open');
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     updateProgress();
   }
 
