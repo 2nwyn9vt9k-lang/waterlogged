@@ -219,6 +219,88 @@
 
   .instance-row:last-of-type { padding-bottom: 12px; }
 
+  .rain-card {
+    margin: 16px 16px 4px 16px;
+    background: var(--paper);
+    border: 1px solid var(--sand);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .rain-head {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--soil);
+    background: var(--sand);
+    padding: 10px 16px;
+  }
+
+  .rain-toggle {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px 0 16px;
+  }
+
+  .rain-btn {
+    flex: 1;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 9px 4px;
+    border-radius: 8px;
+    border: 2px solid var(--sand);
+    cursor: pointer;
+    background: var(--sand-light);
+    color: var(--ink-soft);
+  }
+
+  .rain-btn.no-rain.active { background: var(--leaf-light); border-color: var(--leaf); color: white; }
+  .rain-btn.yes-rain.active { background: var(--wet); border-color: var(--wet); color: white; }
+
+  .rain-details {
+    display: none;
+    padding: 12px 16px 14px 16px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .rain-details.open { display: block; }
+
+  .rain-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .rain-row:last-child { margin-bottom: 0; }
+
+  .rain-row label {
+    flex: 0 0 70px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .rain-row input[type="text"] {
+    flex: 1;
+    border: 1px solid var(--sand);
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    color: var(--ink);
+    background: var(--sand-light);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .rain-row input[type="text"]:focus { outline: none; border-color: var(--wet); }
+
+  .rain-intensity { display: flex; gap: 6px; flex: 1; }
+
+  .rain-intensity .mini-btn { border-color: var(--sand); }
+  .rain-intensity .mini-btn.active { background: var(--wet); border-color: var(--wet); color: white; }
+
   .card-summary {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     font-size: 11px;
@@ -367,6 +449,80 @@
     border-top: 1px dashed var(--sand);
     line-height: 1.4;
   }
+
+  .history-toggle { background: var(--clay); margin-top: 10px; }
+
+  .history-panel {
+    display: none;
+    margin: 16px 16px 0 16px;
+    background: var(--paper);
+    border: 2px solid var(--clay);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .history-panel.open { display: block; }
+
+  .history-head {
+    background: var(--clay);
+    color: var(--paper);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .history-title {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .history-body {
+    padding: 4px 16px 14px 16px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .history-entry {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--sand);
+  }
+
+  .history-entry:first-child { margin-top: 12px; padding-top: 0; border-top: none; }
+
+  .history-entry-label {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--soil);
+    margin-bottom: 6px;
+  }
+
+  .history-counts {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .history-counts span.w { color: var(--danger); }
+  .history-counts span.h { color: var(--leaf); }
+  .history-counts span.s { color: var(--wet); }
+
+  .history-detail {
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  .history-empty {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-style: italic;
+    padding: 10px 0;
+  }
 </style>
 </head>
 <body>
@@ -391,7 +547,34 @@
     <li>Center-of-root-ball readings run falsely wet right after planting (still-saturated nursery mix) &mdash; don't probe there.</li>
     <li><strong>Blueberries:</strong> probe only inside each plant's amended acid pocket, never the surrounding native sand.</li>
     <li><strong>Firespike cutting:</strong> skip the soil probe entirely &mdash; check the rooting medium surface by feel/sight, no roots yet to read.</li>
+    <li><strong>Reading sits right on the 3/4 border?</strong> Pull the probe, move it an inch or two over (still at the root ball edge), and recheck. Still borderline? Default to GREEN/hold &mdash; safer to wait than to risk overwatering, especially for blueberries and coontie.</li>
   </ol>
+</div>
+
+<div class="rain-card">
+  <div class="rain-head">Rain Log &mdash; Today</div>
+  <div class="rain-toggle">
+    <button class="rain-btn no-rain active" id="rainNoBtn" onclick="setRainOccurred(false)">No Rain</button>
+    <button class="rain-btn yes-rain" id="rainYesBtn" onclick="setRainOccurred(true)">Rained</button>
+  </div>
+  <div class="rain-details" id="rainDetails">
+    <div class="rain-row">
+      <label>Start time</label>
+      <input type="text" id="rainTime" placeholder="e.g. 2:15pm">
+    </div>
+    <div class="rain-row">
+      <label>Duration</label>
+      <input type="text" id="rainDuration" placeholder="e.g. 20 min">
+    </div>
+    <div class="rain-row">
+      <label>Intensity</label>
+      <div class="rain-intensity">
+        <button class="mini-btn" data-intensity="Light">Light</button>
+        <button class="mini-btn" data-intensity="Moderate">Moderate</button>
+        <button class="mini-btn" data-intensity="Heavy">Heavy</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <h2 class="section-title">
@@ -400,16 +583,6 @@
 </h2>
 
 <section class="plants" id="plantList">
-
-  <div class="plant-card" data-plant="firebush">
-    <div class="plant-head">
-      <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span></div>
-      <div class="plant-meta">Planted Fri &middot; day 3</div>
-    </div>
-    <div class="probe-note">Probe at root ball edge, 3&ndash;4" deep. Log each plant separately &mdash; a smaller or edge plant can dry faster than the others.</div>
-    <div class="instance-list" data-labels="#1,#2,#3"></div>
-    <div class="card-summary"></div>
-  </div>
 
   <div class="plant-card" data-plant="blueberries">
     <div class="plant-head">
@@ -465,13 +638,13 @@
     <div class="card-summary"></div>
   </div>
 
-  <div class="plant-card" data-plant="lemon">
+  <div class="plant-card" data-plant="firebush">
     <div class="plant-head">
-      <div class="plant-name">Small Lemon Tree</div>
-      <div class="plant-meta">Planted this weekend</div>
+      <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span></div>
+      <div class="plant-meta">Planted Fri &middot; day 3 &middot; north side of house</div>
     </div>
-    <div class="probe-note">Probe at root ball edge, 3&ndash;4" deep.</div>
-    <div class="instance-list" data-labels="#1"></div>
+    <div class="probe-note">Probe at root ball edge, 3&ndash;4" deep. Log each plant separately &mdash; a smaller or edge plant can dry faster than the others.</div>
+    <div class="instance-list" data-labels="#1,#2,#3"></div>
     <div class="card-summary"></div>
   </div>
 
@@ -497,7 +670,17 @@
   <div id="resultsBody" class="results-body"></div>
 </div>
 
-<button class="reset-btn" onclick="resetAll()">Reset all readings</button>
+<button class="reset-btn" onclick="resetAll()">Save &amp; Reset for Next Check</button>
+
+<button class="reset-btn history-toggle" onclick="toggleHistory()">View History Log</button>
+
+<div class="history-panel" id="historyPanel">
+  <div class="history-head">
+    <div class="history-title">Check History</div>
+    <button class="copy-btn" onclick="clearHistory()">Clear history</button>
+  </div>
+  <div id="historyBody" class="history-body"></div>
+</div>
 
 <div class="footer-note">
   Coontie and blueberries stay on separate watering tracks &mdash; don't fold their readings into the general bed decision.
@@ -615,6 +798,76 @@
     saveState(state);
   });
 
+  const rainTimeEl = document.getElementById('rainTime');
+  const rainDurationEl = document.getElementById('rainDuration');
+  const rainDetailsEl = document.getElementById('rainDetails');
+  const rainNoBtn = document.getElementById('rainNoBtn');
+  const rainYesBtn = document.getElementById('rainYesBtn');
+  const intensityBtns = document.querySelectorAll('.rain-intensity .mini-btn');
+
+  function getRainState() {
+    const state = loadState();
+    return state.rain || { occurred: false, time: '', duration: '', intensity: '' };
+  }
+
+  function saveRainState(rain) {
+    const state = loadState();
+    state.rain = rain;
+    saveState(state);
+  }
+
+  function setRainOccurred(occurred) {
+    rainNoBtn.classList.toggle('active', !occurred);
+    rainYesBtn.classList.toggle('active', occurred);
+    rainDetailsEl.classList.toggle('open', occurred);
+    const rain = getRainState();
+    rain.occurred = occurred;
+    saveRainState(rain);
+  }
+
+  function setRainIntensity(val) {
+    intensityBtns.forEach(b => b.classList.toggle('active', b.dataset.intensity === val));
+    const rain = getRainState();
+    rain.intensity = val;
+    saveRainState(rain);
+  }
+
+  intensityBtns.forEach(btn => {
+    btn.addEventListener('click', () => setRainIntensity(btn.dataset.intensity));
+  });
+
+  rainTimeEl.addEventListener('input', () => {
+    const rain = getRainState();
+    rain.time = rainTimeEl.value;
+    saveRainState(rain);
+  });
+
+  rainDurationEl.addEventListener('input', () => {
+    const rain = getRainState();
+    rain.duration = rainDurationEl.value;
+    saveRainState(rain);
+  });
+
+  (function restoreRain() {
+    const rain = getRainState();
+    rainNoBtn.classList.toggle('active', !rain.occurred);
+    rainYesBtn.classList.toggle('active', !!rain.occurred);
+    rainDetailsEl.classList.toggle('open', !!rain.occurred);
+    rainTimeEl.value = rain.time || '';
+    rainDurationEl.value = rain.duration || '';
+    intensityBtns.forEach(b => b.classList.toggle('active', b.dataset.intensity === rain.intensity));
+  })();
+
+  function rainSummaryLine() {
+    const rain = getRainState();
+    if (!rain.occurred) return 'No rain logged';
+    const parts = [];
+    if (rain.time) parts.push('started ' + rain.time);
+    if (rain.duration) parts.push(rain.duration);
+    if (rain.intensity) parts.push(rain.intensity.toLowerCase());
+    return 'Rained' + (parts.length ? ' \u2014 ' + parts.join(', ') : '');
+  }
+
   function updateCardSummary(card, summaryEl) {
     const total = card.querySelectorAll('.instance-row').length;
     const logged = card.querySelectorAll('.instance-result.show').length;
@@ -632,7 +885,43 @@
     document.getElementById('progressLabel').textContent = logged + ' / ' + total + ' logged';
   }
 
+  const HISTORY_KEY = 'gardenMoistureHistory';
+
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  function saveHistory(arr) {
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(arr)); } catch (e) {}
+  }
+
+  function sessionLabel() {
+    const now = new Date();
+    const period = now.getHours() < 12 ? 'Morning' : now.getHours() < 17 ? 'Afternoon' : 'Evening';
+    const dateStr = now.toLocaleDateString(undefined, { weekday: 'short', month: 'numeric', day: 'numeric' });
+    const timeStr = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    return period + ' Check \u2014 ' + dateStr + ', ' + timeStr;
+  }
+
   function resetAll() {
+    const { water, hold, skip, unlogged } = collectResults();
+    const mgNotes = document.getElementById('monkeygrassNotes').value.trim();
+    const totalLogged = water.length + hold.length + skip.length;
+
+    if (totalLogged > 0) {
+      const history = loadHistory();
+      history.unshift({
+        label: sessionLabel(),
+        water: water.map(w => w.text + (w.separate ? ' (separate track)' : '')),
+        hold, skip, unlogged, mgNotes,
+        rain: rainSummaryLine()
+      });
+      saveHistory(history.slice(0, 60));
+    }
+
     document.querySelectorAll('.mini-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.instance-result').forEach(r => {
       r.classList.remove('show', 'action-water', 'action-hold', 'action-skip');
@@ -642,7 +931,56 @@
     document.getElementById('monkeygrassNotes').value = '';
     document.getElementById('resultsPanel').classList.remove('open');
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    setRainOccurred(false);
+    rainTimeEl.value = '';
+    rainDurationEl.value = '';
+    intensityBtns.forEach(b => b.classList.remove('active'));
+    saveRainState({ occurred: false, time: '', duration: '', intensity: '' });
     updateProgress();
+  }
+
+  function toggleHistory() {
+    const panel = document.getElementById('historyPanel');
+    const opening = !panel.classList.contains('open');
+    panel.classList.toggle('open', opening);
+    if (opening) renderHistory();
+  }
+
+  function renderHistory() {
+    const history = loadHistory();
+    const body = document.getElementById('historyBody');
+    if (history.length === 0) {
+      body.innerHTML = '<div class="history-empty">No past checks saved yet. Readings get archived here each time you hit "Save &amp; Reset for Next Check."</div>';
+      return;
+    }
+    body.innerHTML = history.map(entry => {
+      let html = '<div class="history-entry">';
+      html += '<div class="history-entry-label">' + entry.label + '</div>';
+      if (entry.rain) {
+        html += '<div class="history-detail"><strong>' + entry.rain + '</strong></div>';
+      }
+      html += '<div class="history-counts">';
+      html += '<span class="w">' + entry.water.length + ' watered</span>';
+      html += '<span class="h">' + entry.hold.length + ' held</span>';
+      html += '<span class="s">' + entry.skip.length + ' skipped (wet)</span>';
+      html += '</div>';
+      if (entry.water.length) {
+        html += '<div class="history-detail"><strong>Watered:</strong> ' + entry.water.join(', ') + '</div>';
+      }
+      if (entry.mgNotes) {
+        html += '<div class="history-detail"><strong>Monkey grass:</strong> ' + entry.mgNotes.replace(/</g, '&lt;') + '</div>';
+      }
+      if (entry.unlogged && entry.unlogged.length) {
+        html += '<div class="history-detail"><em>Not checked: ' + entry.unlogged.join(', ') + '</em></div>';
+      }
+      html += '</div>';
+      return html;
+    }).join('');
+  }
+
+  function clearHistory() {
+    saveHistory([]);
+    renderHistory();
   }
 
   const SEPARATE_TRACK = { blueberries: true, coontie: true };
@@ -670,6 +1008,8 @@
     const { water, hold, skip, unlogged } = collectResults();
     const body = document.getElementById('resultsBody');
     let html = '';
+
+    html += '<div class="results-note" style="margin-top:0;border-top:none;padding-top:0;"><strong>' + rainSummaryLine() + '</strong></div>';
 
     html += '<div class="results-group">';
     html += '<div class="results-group-title water">Water Today (' + water.length + ')</div>';
@@ -712,7 +1052,8 @@
 
   function buildShareText() {
     const { water, hold, skip, unlogged } = collectResults();
-    let t = 'Watering Plan \u2014 Mon 7/13 (7:30am check)\n\n';
+    let t = 'Watering Plan \u2014 Mon 7/13 (7:30am check)\n';
+    t += rainSummaryLine() + '\n\n';
     t += 'WATER TODAY (' + water.length + ')\n';
     t += water.length ? water.map(w => '- ' + w.text + (w.separate ? ' (own pocket, separate track)' : '')).join('\n') : '- none';
     t += '\n\nHOLD OFF (' + hold.length + ')\n';
