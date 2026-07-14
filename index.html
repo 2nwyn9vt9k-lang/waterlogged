@@ -881,7 +881,7 @@
 <body>
 
 <header>
-  <div class="eyebrow">North Tampa &middot; Monday, July 13 &middot; 7:30am round</div>
+  <div class="eyebrow" id="eyebrowText">North Tampa &middot; Monday, July 13 &middot; 7:30am round</div>
   <h1>Garden Moisture Tracker</h1>
   <div class="sub">Log each individual plant &mdash; groups can read differently plant to plant</div>
   <div class="tabs">
@@ -1014,7 +1014,7 @@
 
 <div class="results-panel" id="resultsPanel">
   <div class="results-head">
-    <div class="results-title">Watering Plan &mdash; Mon 7/13</div>
+    <div class="results-title" id="resultsTitleText">Watering Plan &mdash; Mon 7/13</div>
     <button class="copy-btn" onclick="copyResults()" id="copyBtn">Copy for partner</button>
   </div>
   <div id="resultsBody" class="results-body"></div>
@@ -1072,7 +1072,7 @@
   const ZONE_LABELS_STD = ['RED', 'GREEN', 'BLUE'];
   const ZONE_LABELS_DWM = ['DRY', 'MOIST', 'WET'];
 
-  const STORAGE_KEY = 'gardenMoistureCheck_2026-07-13';
+  const STORAGE_KEY = 'gardenMoistureCheck_' + new Date().toLocaleDateString('en-CA');
 
   function loadState() {
     try {
@@ -1158,15 +1158,35 @@
   const rainYesBtn = document.getElementById('rainYesBtn');
   const rainEventsContainer = document.getElementById('rainEventsContainer');
 
+  // Rain is a fact about the calendar day, not about any single moisture-check
+  // session — it lives in its own store, keyed by date, so it's unaffected by
+  // Save & Reset and gets recorded even on days you never log a plant reading.
+  const RAIN_LOG_KEY = 'gardenRainLog';
+
+  function todayDateKey() {
+    return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD, local time
+  }
+
+  function loadRainLog() {
+    try {
+      const raw = localStorage.getItem(RAIN_LOG_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function saveRainLog(log) {
+    try { localStorage.setItem(RAIN_LOG_KEY, JSON.stringify(log)); } catch (e) {}
+  }
+
   function getRainState() {
-    const state = loadState();
-    return state.rain || { occurred: false, events: [], autoFilled: false, userEdited: false };
+    const log = loadRainLog();
+    return log[todayDateKey()] || { occurred: false, events: [], autoFilled: false, userEdited: false };
   }
 
   function saveRainState(rain) {
-    const state = loadState();
-    state.rain = rain;
-    saveState(state);
+    const log = loadRainLog();
+    log[todayDateKey()] = rain;
+    saveRainLog(log);
   }
 
   function clearWeatherStatus() {
@@ -1445,6 +1465,22 @@
     return period + ' Check \u2014 ' + dateStr + ', ' + timeStr;
   }
 
+  function shortDateLabel() {
+    const now = new Date();
+    return now.toLocaleDateString(undefined, { weekday: 'short', month: 'numeric', day: 'numeric' });
+  }
+
+  function updateEyebrow() {
+    const el = document.getElementById('eyebrowText');
+    if (!el) return;
+    const now = new Date();
+    const datePart = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    const timePart = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    el.textContent = 'North Tampa \u00b7 ' + datePart + ' \u00b7 ' + timePart + ' round';
+  }
+
+  updateEyebrow();
+
   function resetAll() {
     const { water, hold, skip, unlogged, raw } = collectResults();
     const mgNotes = document.getElementById('monkeygrassNotes').value.trim();
@@ -1475,12 +1511,10 @@
     document.getElementById('monkeygrassNotes').value = '';
     document.getElementById('resultsPanel').classList.remove('open');
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-    setRainOccurred(false);
-    saveRainState({ occurred: false, events: [], autoFilled: false, userEdited: false });
-    renderRainEvents([{ time: '', duration: '', intensity: '' }]);
-    clearWeatherStatus();
-    fetchWeatherRain(true);
-    updateRainContextBanner();
+    // Rain is independent of the check session — don't wipe it. Just check
+    // for anything new since the last refresh (won't clobber manual edits).
+    fetchWeatherRain(false);
+    updateEyebrow();
     updateProgress();
   }
 
@@ -1499,24 +1533,29 @@
       return;
     }
     body.innerHTML = history.map(entry => {
+      const totalChecked = entry.water.length + entry.hold.length + entry.skip.length;
       let html = '<div class="history-entry">';
       html += '<div class="history-entry-label">' + entry.label + '</div>';
       if (entry.rain) {
         html += '<div class="history-detail"><strong>' + entry.rain + '</strong></div>';
       }
-      html += '<div class="history-counts">';
-      html += '<span class="w">' + entry.water.length + ' watered</span>';
-      html += '<span class="h">' + entry.hold.length + ' held</span>';
-      html += '<span class="s">' + entry.skip.length + ' skipped (wet)</span>';
-      html += '</div>';
-      if (entry.water.length) {
-        html += '<div class="history-detail"><strong>Watered:</strong> ' + entry.water.join(', ') + '</div>';
+      if (totalChecked === 0) {
+        html += '<div class="history-detail"><em>Weather check only \u2014 no plant readings logged this round.</em></div>';
+      } else {
+        html += '<div class="history-counts">';
+        html += '<span class="w">' + entry.water.length + ' watered</span>';
+        html += '<span class="h">' + entry.hold.length + ' held</span>';
+        html += '<span class="s">' + entry.skip.length + ' skipped (wet)</span>';
+        html += '</div>';
+        if (entry.water.length) {
+          html += '<div class="history-detail"><strong>Watered:</strong> ' + entry.water.join(', ') + '</div>';
+        }
+        if (entry.unlogged && entry.unlogged.length) {
+          html += '<div class="history-detail"><em>Not checked: ' + entry.unlogged.join(', ') + '</em></div>';
+        }
       }
       if (entry.mgNotes) {
         html += '<div class="history-detail"><strong>Monkey grass:</strong> ' + entry.mgNotes.replace(/</g, '&lt;') + '</div>';
-      }
-      if (entry.unlogged && entry.unlogged.length) {
-        html += '<div class="history-detail"><em>Not checked: ' + entry.unlogged.join(', ') + '</em></div>';
       }
       html += '</div>';
       return html;
@@ -1556,6 +1595,8 @@
   function showResults() {
     const { water, hold, skip, unlogged } = collectResults();
     const body = document.getElementById('resultsBody');
+    const titleEl = document.getElementById('resultsTitleText');
+    if (titleEl) titleEl.textContent = 'Watering Plan \u2014 ' + shortDateLabel();
     let html = '';
 
     html += '<div class="results-note" style="margin-top:0;border-top:none;padding-top:0;"><strong>' + rainSummaryLine() + '</strong></div>';
@@ -1601,7 +1642,9 @@
 
   function buildShareText() {
     const { water, hold, skip, unlogged } = collectResults();
-    let t = 'Watering Plan \u2014 Mon 7/13 (7:30am check)\n';
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    let t = 'Watering Plan \u2014 ' + shortDateLabel() + ' (' + timeStr + ' check)\n';
     t += rainSummaryLine() + '\n\n';
     t += 'WATER TODAY (' + water.length + ')\n';
     t += water.length ? water.map(w => '- ' + w.text + (w.separate ? ' (own pocket, separate track)' : '')).join('\n') : '- none';
@@ -1694,7 +1737,10 @@
     html += overviewCard(sorted.length, 'Sessions Logged');
     const spanDays = oldest.timestamp ? Math.max(1, Math.ceil((Date.now() - oldest.timestamp) / 86400000)) : sorted.length;
     html += overviewCard(spanDays, 'Days Tracked');
-    const rainDays = sorted.filter(s => s.rainOccurred).length;
+    const rainDays = new Set(
+      sorted.filter(s => s.rainOccurred && s.timestamp)
+            .map(s => new Date(s.timestamp).toLocaleDateString('en-CA'))
+    ).size;
     html += overviewCard(rainDays, 'Rain Days');
     html += '</div>';
 
