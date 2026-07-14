@@ -333,6 +333,63 @@
 
   .rain-details.open { display: block; }
 
+  .rain-save-row {
+    padding: 4px 16px 14px 16px;
+  }
+
+  .rain-save-btn {
+    display: block;
+    width: 100%;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    background: var(--wet);
+    border: none;
+    border-radius: 8px;
+    padding: 11px;
+    cursor: pointer;
+  }
+
+  .rain-save-confirm {
+    display: none;
+    margin: 0 16px 10px 16px;
+    background: #d8e6ef;
+    color: #2e5a72;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .rain-save-confirm.show { display: block; }
+
+  .rain-today-log {
+    margin: 0 16px 16px 16px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .rain-today-log:empty { margin: 0; }
+
+  .rain-today-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  .rain-today-entry {
+    font-size: 12px;
+    color: var(--ink);
+    padding: 6px 0;
+    border-top: 1px dashed var(--sand);
+  }
+
+  .rain-today-entry:first-child { border-top: none; }
+
   .rain-row {
     display: flex;
     align-items: center;
@@ -923,6 +980,11 @@
     <div id="rainEventsContainer"></div>
     <button class="add-event-btn" id="addRainEventBtn" onclick="addRainEvent()">+ Add another rain event</button>
   </div>
+  <div class="rain-save-row">
+    <button class="rain-save-btn" id="saveRainBtn" onclick="saveRainEntry()">Save This Rain Entry</button>
+  </div>
+  <div class="rain-save-confirm" id="rainSaveConfirm"></div>
+  <div class="rain-today-log" id="rainTodayLog"></div>
 </div>
 
 <div class="rain-context-banner" id="rainContextBanner"></div>
@@ -1189,6 +1251,23 @@
     saveRainLog(log);
   }
 
+  // Permanent, independent rain history — separate from both the day's draft
+  // (gardenRainLog) and the plant-check history (gardenMoistureHistory).
+  // Rain can happen several times a day and isn't tied to a moisture check,
+  // so it gets its own save action and its own running log.
+  const RAIN_HISTORY_KEY = 'gardenRainHistory';
+
+  function loadRainHistory() {
+    try {
+      const raw = localStorage.getItem(RAIN_HISTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+
+  function saveRainHistoryLog(arr) {
+    try { localStorage.setItem(RAIN_HISTORY_KEY, JSON.stringify(arr)); } catch (e) {}
+  }
+
   function clearWeatherStatus() {
     const el = document.getElementById('weatherStatus');
     if (el) { el.classList.remove('show', 'auto', 'error'); el.textContent = ''; }
@@ -1402,6 +1481,62 @@
     banner.textContent = msg;
   }
 
+  function saveRainEntry() {
+    const rain = getRainState();
+    const entry = {
+      timestamp: Date.now(),
+      dateKey: todayDateKey(),
+      occurred: !!rain.occurred,
+      events: rain.occurred ? rain.events.filter(e => e.time || e.duration || e.intensity) : []
+    };
+    // If "Rained" was toggled on but no event details were filled in, still
+    // log it as a bare occurred:true entry rather than dropping it silently.
+    if (rain.occurred && entry.events.length === 0) entry.events = [{ time: '', duration: '', intensity: '' }];
+
+    const history = loadRainHistory();
+    history.unshift(entry);
+    saveRainHistoryLog(history.slice(0, 300));
+
+    // Clear the draft — this entry is now logged, so the form resets for
+    // the next rain check (could be later the same day).
+    const freshRain = { occurred: false, events: [{ time: '', duration: '', intensity: '' }], autoFilled: false, userEdited: false };
+    saveRainState(freshRain);
+    rainNoBtn.classList.add('active');
+    rainYesBtn.classList.remove('active');
+    rainDetailsEl.classList.remove('open');
+    renderRainEvents(freshRain.events);
+    updateRainContextBanner();
+    clearWeatherStatus();
+    renderTodayRainLog();
+
+    const confirmEl = document.getElementById('rainSaveConfirm');
+    if (confirmEl) {
+      const timeStr = new Date(entry.timestamp).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+      confirmEl.textContent = (entry.occurred ? 'Rain entry saved' : 'No-rain check saved') + ' \u2014 ' + timeStr + '. Form cleared \u2014 log again if it rains again today.';
+      confirmEl.classList.add('show');
+      setTimeout(() => confirmEl.classList.remove('show'), 4000);
+    }
+  }
+
+  function renderTodayRainLog() {
+    const el = document.getElementById('rainTodayLog');
+    if (!el) return;
+    const today = todayDateKey();
+    const entries = loadRainHistory().filter(e => e.dateKey === today);
+    if (entries.length === 0) { el.innerHTML = ''; return; }
+    let html = '<div class="rain-today-title">Saved today (' + entries.length + ')</div>';
+    entries.forEach(e => {
+      const timeStr = new Date(e.timestamp).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+      if (!e.occurred) {
+        html += '<div class="rain-today-entry">' + timeStr + ' \u2014 no rain</div>';
+      } else {
+        const parts = e.events.map(ev => [ev.time, ev.duration, ev.intensity].filter(Boolean).join(', ')).filter(Boolean).join(' / ');
+        html += '<div class="rain-today-entry">' + timeStr + ' \u2014 rained' + (parts ? ' (' + parts + ')' : '') + '</div>';
+      }
+    });
+    el.innerHTML = html;
+  }
+
   (function restoreRain() {
     const rain = getRainState();
     rainNoBtn.classList.toggle('active', !rain.occurred);
@@ -1409,6 +1544,7 @@
     rainDetailsEl.classList.toggle('open', !!rain.occurred);
     renderRainEvents(rain.events.length ? rain.events : [{ time: '', duration: '', intensity: '' }]);
     updateRainContextBanner();
+    renderTodayRainLog();
     // Auto-fill from weather on load, unless rain was already manually logged/edited today
     fetchWeatherRain(false);
   })();
@@ -1485,18 +1621,18 @@
     const { water, hold, skip, unlogged, raw } = collectResults();
     const mgNotes = document.getElementById('monkeygrassNotes').value.trim();
     const totalLogged = water.length + hold.length + skip.length;
-    const rainState = getRainState();
 
-    if (totalLogged > 0 || rainState.occurred) {
+    // Rain has its own "Save This Rain Entry" button and its own history
+    // (gardenRainHistory) — this plant check-in no longer touches rain data
+    // at all, since rain and plant checks aren't 1:1 (rain can happen
+    // several times a day; plant checks happen ~2x a day on a schedule).
+    if (totalLogged > 0) {
       const history = loadHistory();
       history.unshift({
         label: sessionLabel(),
         timestamp: Date.now(),
         water: water.map(w => w.text + (w.separate ? ' (separate track)' : '')),
         hold, skip, unlogged, mgNotes,
-        rain: rainSummaryLine(),
-        rainOccurred: !!rainState.occurred,
-        rainEvents: rainState.occurred ? rainState.events : [],
         raw
       });
       saveHistory(history.slice(0, 90));
@@ -1511,9 +1647,6 @@
     document.getElementById('monkeygrassNotes').value = '';
     document.getElementById('resultsPanel').classList.remove('open');
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-    // Rain is independent of the check session — don't wipe it. Just check
-    // for anything new since the last refresh (won't clobber manual edits).
-    fetchWeatherRain(false);
     updateEyebrow();
     updateProgress();
   }
@@ -1716,30 +1849,35 @@
 
   function renderMetrics() {
     const history = loadHistory();
+    const rainHistory = loadRainHistory();
     const app = document.getElementById('app');
 
-    if (history.length === 0) {
+    if (history.length === 0 && rainHistory.length === 0) {
       app.innerHTML =
         '<div class="empty-state">No history yet. Log a few moisture checks on the main page and hit ' +
-        '&ldquo;Save &amp; Reset for Next Check&rdquo; &mdash; patterns will show up here once there\u2019s data to work with.</div>';
+        '&ldquo;Save &amp; Reset for Next Check&rdquo;, or log rain with &ldquo;Save This Rain Entry&rdquo; ' +
+        '&mdash; patterns will show up here once there\u2019s data to work with.</div>';
       return;
     }
 
     // sort newest first (defensive, history is already unshifted newest-first)
     const sorted = [...history].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    const oldest = sorted[sorted.length - 1];
-    const newest = sorted[0];
+    const sortedRain = [...rainHistory].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const oldest = sorted.length ? sorted[sorted.length - 1] : null;
+    const newest = sorted.length ? sorted[0] : null;
 
     let html = '';
 
     // --- Overview strip ---
     html += '<div class="overview-strip">';
     html += overviewCard(sorted.length, 'Sessions Logged');
-    const spanDays = oldest.timestamp ? Math.max(1, Math.ceil((Date.now() - oldest.timestamp) / 86400000)) : sorted.length;
+    const spanDays = oldest && oldest.timestamp ? Math.max(1, Math.ceil((Date.now() - oldest.timestamp) / 86400000)) : sorted.length;
     html += overviewCard(spanDays, 'Days Tracked');
+    // Rain Days now comes straight from the independent rain history — every
+    // saved rain entry counts, whether or not a plant check happened that day.
     const rainDays = new Set(
-      sorted.filter(s => s.rainOccurred && s.timestamp)
-            .map(s => new Date(s.timestamp).toLocaleDateString('en-CA'))
+      sortedRain.filter(r => r.occurred && r.timestamp)
+                .map(r => r.dateKey || new Date(r.timestamp).toLocaleDateString('en-CA'))
     ).size;
     html += overviewCard(rainDays, 'Rain Days');
     html += '</div>';
@@ -1772,7 +1910,7 @@
     html += '<div class="bar-legend"><span><i class="legend-dot dry"></i>Dry</span><span><i class="legend-dot moist"></i>Moist</span><span><i class="legend-dot wet"></i>Wet</span></div>';
 
     // --- Rain impact on dryness ---
-    const impact = computeRainImpact(sorted);
+    const impact = computeRainImpact(sorted, sortedRain);
     html += '<h2 class="section-title">Rain Impact on Dryness</h2>';
     html += '<div class="card"><div class="card-inner">';
     if (impact.rainTotal === 0 || impact.noRainTotal === 0) {
@@ -1838,7 +1976,7 @@
     html += '</div></div>';
 
     // --- Rain summary ---
-    const rainStats = computeRainStats(sorted);
+    const rainStats = computeRainStats(sortedRain);
     html += '<h2 class="section-title">Rain Summary</h2>';
     html += '<div class="card"><div class="card-inner">';
     html += rainStatRow('Total rain events', rainStats.totalEvents);
@@ -1859,7 +1997,10 @@
     });
     html += '</div></div>';
 
-    html += '<div class="footer-note">Based on ' + sorted.length + ' saved session' + (sorted.length === 1 ? '' : 's') + ', most recent: ' + newest.label + '.</div>';
+    const footerBits = [];
+    footerBits.push(sorted.length + ' saved plant session' + (sorted.length === 1 ? '' : 's') + (newest ? ', most recent: ' + newest.label : ''));
+    footerBits.push(sortedRain.length + ' saved rain entr' + (sortedRain.length === 1 ? 'y' : 'ies'));
+    html += '<div class="footer-note">Based on ' + footerBits.join(' &middot; ') + '.</div>';
 
     app.innerHTML = html;
   }
@@ -1872,12 +2013,17 @@
     return '<div class="rain-stat-row"><span class="rain-stat-label">' + label + '</span><span class="rain-stat-value">' + value + '</span></div>';
   }
 
-  function computeRainImpact(sorted) {
+  function computeRainImpact(sorted, sortedRain) {
+    // Days it rained, per the independent rain history (not copied fields).
+    const rainDateKeys = new Set(
+      (sortedRain || []).filter(r => r.occurred).map(r => r.dateKey || new Date(r.timestamp).toLocaleDateString('en-CA'))
+    );
     let rainDry = 0, rainTotal = 0, noRainDry = 0, noRainTotal = 0;
     const perPlant = {};
     sorted.forEach(entry => {
       if (!entry.raw) return;
-      const isRainDay = !!entry.rainOccurred;
+      const entryDateKey = entry.timestamp ? new Date(entry.timestamp).toLocaleDateString('en-CA') : null;
+      const isRainDay = entryDateKey ? rainDateKeys.has(entryDateKey) : false;
       Object.values(entry.raw).forEach(r => {
         if (!perPlant[r.plant]) perPlant[r.plant] = { rainDry: 0, rainTotal: 0, noRainDry: 0, noRainTotal: 0 };
         const p = perPlant[r.plant];
@@ -1934,13 +2080,15 @@
     return streaks.sort((a, b) => b.count - a.count);
   }
 
-  function computeRainStats(sorted) {
+  function computeRainStats(sortedRain) {
+    // sortedRain is the independent rain history, newest-first, each entry
+    // saved via the "Save This Rain Entry" button.
     let totalEvents = 0, light = 0, moderate = 0, heavy = 0;
     let lastRainTimestamp = null;
-    sorted.forEach(entry => {
-      if (entry.rainOccurred && entry.rainEvents && entry.rainEvents.length) {
+    (sortedRain || []).forEach(entry => {
+      if (entry.occurred && entry.events && entry.events.length) {
         if (lastRainTimestamp === null && entry.timestamp) lastRainTimestamp = entry.timestamp;
-        entry.rainEvents.forEach(ev => {
+        entry.events.forEach(ev => {
           totalEvents++;
           if (ev.intensity === 'Light') light++;
           else if (ev.intensity === 'Moderate') moderate++;
