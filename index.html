@@ -288,6 +288,21 @@
   .weather-status.auto { color: var(--wet); }
   .weather-status.error { color: var(--danger); }
 
+  .rain-context-banner {
+    display: none;
+    margin: 4px 16px 18px 16px;
+    background: #d8e6ef;
+    color: #2e5a72;
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    line-height: 1.5;
+    border-left: 3px solid var(--wet);
+  }
+
+  .rain-context-banner.show { display: block; }
+
   .rain-toggle {
     display: flex;
     gap: 8px;
@@ -897,7 +912,7 @@
 <div class="rain-card">
   <div class="rain-head">
     <span>Rain Log &mdash; Today</span>
-    <button class="weather-btn" id="weatherBtn" onclick="fetchWeatherRain(true)">&#8635; Refresh Weather</button>
+    <button class="weather-btn" id="weatherBtn" onclick="fetchWeatherRain(true)">Refresh Weather</button>
   </div>
   <div class="weather-status" id="weatherStatus"></div>
   <div class="rain-toggle">
@@ -909,6 +924,8 @@
     <button class="add-event-btn" id="addRainEventBtn" onclick="addRainEvent()">+ Add another rain event</button>
   </div>
 </div>
+
+<div class="rain-context-banner" id="rainContextBanner"></div>
 
 <h2 class="section-title">
   <span>Weekend Plantings</span>
@@ -1169,6 +1186,7 @@
     if (manual) { rain.userEdited = true; rain.autoFilled = false; clearWeatherStatus(); }
     saveRainState(rain);
     renderRainEvents(rain.events);
+    updateRainContextBanner();
   }
 
   function addRainEvent() {
@@ -1177,6 +1195,7 @@
     rain.userEdited = true; rain.autoFilled = false; clearWeatherStatus();
     saveRainState(rain);
     renderRainEvents(rain.events);
+    updateRainContextBanner();
   }
 
   function removeRainEvent(idx) {
@@ -1186,13 +1205,17 @@
     rain.userEdited = true; rain.autoFilled = false; clearWeatherStatus();
     saveRainState(rain);
     renderRainEvents(rain.events);
+    updateRainContextBanner();
   }
 
   function updateRainEventField(idx, field, value) {
     const rain = getRainState();
     rain.events[idx][field] = value;
+    delete rain.events[idx]._startISO;
+    delete rain.events[idx]._endISO;
     rain.userEdited = true; rain.autoFilled = false; clearWeatherStatus();
     saveRainState(rain);
+    updateRainContextBanner();
   }
 
   // North Tampa / Lutz property — approximate coordinates.
@@ -1242,13 +1265,21 @@
               duration: '1 hr',
               intensity: intensity,
               _hours: 1,
-              _lastIdx: i
+              _lastIdx: i,
+              _startISO: times[i]
             };
             events.push(current);
           }
         }
       }
-      events.forEach(e => { delete e._hours; delete e._lastIdx; });
+      events.forEach(e => {
+        if (e._lastIdx !== undefined && e._lastIdx !== null) {
+          const endDate = new Date(times[e._lastIdx]);
+          endDate.setHours(endDate.getHours() + 1);
+          e._endISO = endDate.toISOString();
+        }
+        delete e._hours; delete e._lastIdx;
+      });
 
       const rain = {
         occurred: events.length > 0,
@@ -1261,6 +1292,7 @@
       rainYesBtn.classList.toggle('active', rain.occurred);
       rainDetailsEl.classList.toggle('open', rain.occurred);
       renderRainEvents(rain.events);
+      updateRainContextBanner();
 
       if (statusEl) {
         statusEl.classList.remove('error');
@@ -1276,7 +1308,7 @@
         statusEl.textContent = 'Could not reach weather service \u2014 log rain manually below.';
       }
     } finally {
-      if (btn) { btn.disabled = false; btn.innerHTML = '&#8635; Refresh Weather'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = 'Refresh Weather'; }
     }
   }
 
@@ -1314,12 +1346,49 @@
     });
   }
 
+  function updateRainContextBanner() {
+    const banner = document.getElementById('rainContextBanner');
+    if (!banner) return;
+    const rain = getRainState();
+    if (!rain.occurred || !rain.events.length) {
+      banner.classList.remove('show');
+      banner.textContent = '';
+      return;
+    }
+
+    let mostRecentEnd = null;
+    let mostRecentIntensity = null;
+    rain.events.forEach(ev => {
+      if (ev._endISO) {
+        const end = new Date(ev._endISO);
+        if (!mostRecentEnd || end > mostRecentEnd) { mostRecentEnd = end; mostRecentIntensity = ev.intensity; }
+      }
+    });
+
+    let msg;
+    if (mostRecentEnd) {
+      const now = new Date();
+      const minsAgo = Math.round((now - mostRecentEnd) / 60000);
+      let agoText;
+      if (minsAgo < 5) agoText = 'just now / still falling';
+      else if (minsAgo < 60) agoText = minsAgo + ' min ago';
+      else agoText = Math.round(minsAgo / 60) + ' hr ago';
+      msg = 'Rained today' + (mostRecentIntensity ? ' (' + mostRecentIntensity.toLowerCase() + ')' : '') +
+        ', last period ended ~' + agoText + '. Sandy soil drains fast \u2014 still probe 3\u20134" at the root ball edge before deciding, especially on anything already borderline.';
+    } else {
+      msg = 'Rain logged today \u2014 factor it in, but sandy soil drains fast so still probe before skipping a watering.';
+    }
+    banner.classList.add('show');
+    banner.textContent = msg;
+  }
+
   (function restoreRain() {
     const rain = getRainState();
     rainNoBtn.classList.toggle('active', !rain.occurred);
     rainYesBtn.classList.toggle('active', !!rain.occurred);
     rainDetailsEl.classList.toggle('open', !!rain.occurred);
     renderRainEvents(rain.events.length ? rain.events : [{ time: '', duration: '', intensity: '' }]);
+    updateRainContextBanner();
     // Auto-fill from weather on load, unless rain was already manually logged/edited today
     fetchWeatherRain(false);
   })();
@@ -1382,7 +1451,7 @@
     const totalLogged = water.length + hold.length + skip.length;
     const rainState = getRainState();
 
-    if (totalLogged > 0) {
+    if (totalLogged > 0 || rainState.occurred) {
       const history = loadHistory();
       history.unshift({
         label: sessionLabel(),
@@ -1411,6 +1480,7 @@
     renderRainEvents([{ time: '', duration: '', intensity: '' }]);
     clearWeatherStatus();
     fetchWeatherRain(true);
+    updateRainContextBanner();
     updateProgress();
   }
 
@@ -1655,6 +1725,40 @@
     html += '</div></div>';
     html += '<div class="bar-legend"><span><i class="legend-dot dry"></i>Dry</span><span><i class="legend-dot moist"></i>Moist</span><span><i class="legend-dot wet"></i>Wet</span></div>';
 
+    // --- Rain impact on dryness ---
+    const impact = computeRainImpact(sorted);
+    html += '<h2 class="section-title">Rain Impact on Dryness</h2>';
+    html += '<div class="card"><div class="card-inner">';
+    if (impact.rainTotal === 0 || impact.noRainTotal === 0) {
+      html += '<div class="risk-alert ok">Need logged reads on both rain days and non-rain days to compare &mdash; keep logging on days it doesn&rsquo;t rain too.</div>';
+    } else {
+      const pRain = Math.round((impact.rainDry / impact.rainTotal) * 100);
+      const pNoRain = Math.round((impact.noRainDry / impact.noRainTotal) * 100);
+      const diff = pNoRain - pRain;
+      html += '<div class="rain-stat-row"><span class="rain-stat-label">Dry rate on rain days</span><span class="rain-stat-value">' + pRain + '% (' + impact.rainDry + '/' + impact.rainTotal + ')</span></div>';
+      html += '<div class="rain-stat-row"><span class="rain-stat-label">Dry rate on no-rain days</span><span class="rain-stat-value">' + pNoRain + '% (' + impact.noRainDry + '/' + impact.noRainTotal + ')</span></div>';
+      const msg = diff > 10
+        ? 'Beds run noticeably drier on days without rain (+' + diff + ' pts) \u2014 rain is doing real work here.'
+        : (diff < -10
+          ? 'Beds are reading drier on rain days than non-rain days (' + diff + ' pts) \u2014 worth a look, could mean checks happen before rain reaches root depth, or sandy soil is draining faster than rain replenishes it.'
+          : 'Dryness rate is fairly similar with or without rain so far (' + diff + ' pt difference) \u2014 not a strong signal yet.');
+      html += '<div class="risk-alert ' + (Math.abs(diff) > 10 ? 'warn' : 'ok') + '" style="margin-top:10px;">' + msg + '</div>';
+
+      const plantRows = Object.keys(impact.perPlant).filter(p => impact.perPlant[p].rainTotal >= 2 && impact.perPlant[p].noRainTotal >= 2);
+      if (plantRows.length) {
+        html += '<div style="margin-top:10px;">';
+        plantRows.forEach(p => {
+          const s = impact.perPlant[p];
+          const pr = Math.round((s.rainDry / s.rainTotal) * 100);
+          const pnr = Math.round((s.noRainDry / s.noRainTotal) * 100);
+          html += '<div class="taper-row"><div><div class="taper-name">' + (PLANT_LABELS[p] || p) + '</div>' +
+            '<div class="taper-days">rain days ' + pr + '% dry &middot; no-rain days ' + pnr + '% dry</div></div></div>';
+        });
+        html += '</div>';
+      }
+    }
+    html += '</div></div>';
+
     // --- High-risk watch ---
     html += '<h2 class="section-title">High-Risk Watch</h2>';
     html += '<div class="card"><div class="card-inner">';
@@ -1720,6 +1824,27 @@
 
   function rainStatRow(label, value) {
     return '<div class="rain-stat-row"><span class="rain-stat-label">' + label + '</span><span class="rain-stat-value">' + value + '</span></div>';
+  }
+
+  function computeRainImpact(sorted) {
+    let rainDry = 0, rainTotal = 0, noRainDry = 0, noRainTotal = 0;
+    const perPlant = {};
+    sorted.forEach(entry => {
+      if (!entry.raw) return;
+      const isRainDay = !!entry.rainOccurred;
+      Object.values(entry.raw).forEach(r => {
+        if (!perPlant[r.plant]) perPlant[r.plant] = { rainDry: 0, rainTotal: 0, noRainDry: 0, noRainTotal: 0 };
+        const p = perPlant[r.plant];
+        if (isRainDay) {
+          rainTotal++; if (r.zone === 0) rainDry++;
+          p.rainTotal++; if (r.zone === 0) p.rainDry++;
+        } else {
+          noRainTotal++; if (r.zone === 0) noRainDry++;
+          p.noRainTotal++; if (r.zone === 0) p.noRainDry++;
+        }
+      });
+    });
+    return { rainDry, rainTotal, noRainDry, noRainTotal, perPlant };
   }
 
   function computePlantStats(sorted) {
