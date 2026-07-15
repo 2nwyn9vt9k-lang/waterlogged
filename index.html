@@ -906,7 +906,35 @@
   .rain-stat-label { color: var(--ink-soft); }
   .rain-stat-value { font-weight: 700; color: var(--soil); }
 
-  
+  .export-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .export-btn {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--paper);
+    background: var(--leaf);
+    border: none;
+    border-radius: 8px;
+    padding: 11px;
+    cursor: pointer;
+  }
+
+  .export-btn.secondary { background: var(--wet); }
+  .export-btn.tertiary { background: var(--bark); }
+  .export-btn.copied { opacity: 0.7; }
+
+  .export-note {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-top: 10px;
+  }
 
   .tabs {
     display: flex;
@@ -1106,28 +1134,28 @@
 <script>
   const RULES = {
     firebush:    { red: "action-water", redText: "Water now. Soak the root zone, not the whole bed.",
-                   green: "action-hold", greenText: "Hold off &mdash; recheck this evening.",
-                   blue: "action-skip", blueText: "Skip. Too wet &mdash; watch for yellowing lower leaves or soft stem base." },
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Too wet \u2014 watch for yellowing lower leaves or soft stem base." },
     blueberries: { red: "action-water", redText: "Deep soak this plant's amended pocket only.",
-                   green: "action-hold", greenText: "Hold &mdash; on track for the 2-3x/week schedule.",
+                   green: "action-hold", greenText: "Hold \u2014 on track for the 2-3x/week schedule.",
                    blue: "action-skip", blueText: "Skip. Yellow leaves with green veins later = pH stress, not water." },
     pentas:      { red: "action-water", redText: "Water now, shallow soak (2-3\").",
-                   green: "action-hold", greenText: "Hold off &mdash; recheck this evening.",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
                    blue: "action-skip", blueText: "Skip. Let it dry out before next check." },
-    bluedaze:    { red: "action-water", redText: "Water now &mdash; and check the rest of the bed too, dry canary means dry bed.",
+    bluedaze:    { red: "action-water", redText: "Water now \u2014 and check the rest of the bed too, dry canary means dry bed.",
                    green: "action-hold", greenText: "Hold. Bed likely fine overall.",
                    blue: "action-skip", blueText: "Skip watering across the bed for this round." },
-    coontie:     { red: "action-water", redText: "Only if truly dry at the root edge &mdash; deep soak, separate track.",
-                   green: "action-hold", greenText: "Hold. This is the target zone &mdash; leave it alone.",
-                   blue: "action-skip", blueText: "Skip. Coontie tolerates dry far better than wet &mdash; do not water." },
-    monkeygrass: { red: "action-water", redText: "Optional light water &mdash; monkey grass is tough, browning tips will tell you if it's truly stressed.",
+    coontie:     { red: "action-water", redText: "Only if truly dry at the root edge \u2014 deep soak, separate track.",
+                   green: "action-hold", greenText: "Hold. This is the target zone \u2014 leave it alone.",
+                   blue: "action-skip", blueText: "Skip. Coontie tolerates dry far better than wet \u2014 do not water." },
+    monkeygrass: { red: "action-water", redText: "Optional light water \u2014 monkey grass is tough, browning tips will tell you if it's truly stressed.",
                    green: "action-hold", greenText: "Hold, likely fine to skip this check entirely.",
                    blue: "action-skip", blueText: "Skip." },
     lemon:       { red: "action-water", redText: "Water now, soak at root ball edge.",
-                   green: "action-hold", greenText: "Hold off &mdash; recheck this evening.",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
                    blue: "action-skip", blueText: "Skip. Let it dry before next check." },
-    firespike:   { red: "action-water", redText: "Lightly moisten the rooting medium &mdash; don't soak.",
-                   green: "action-hold", greenText: "Good &mdash; evenly moist is the target, leave it.",
+    firespike:   { red: "action-water", redText: "Lightly moisten the rooting medium \u2014 don't soak.",
+                   green: "action-hold", greenText: "Good \u2014 evenly moist is the target, leave it.",
                    blue: "action-skip", blueText: "Ease up. Check stem base for blackening/mushiness before adding more." }
   };
 
@@ -1997,6 +2025,17 @@
     });
     html += '</div></div>';
 
+    // --- Export ---
+    html += '<h2 class="section-title">Export Data</h2>';
+    html += '<div class="card"><div class="card-inner">';
+    html += '<div class="export-buttons">';
+    html += '<button class="export-btn" id="exportMoistureBtn" onclick="exportMoistureCSV()">Export Moisture Readings (CSV)</button>';
+    html += '<button class="export-btn secondary" id="exportRainBtn" onclick="exportRainCSV()">Export Rain Log (CSV)</button>';
+    html += '<button class="export-btn tertiary" id="exportJsonBtn" onclick="exportFullBackupJSON()">Export Full Backup (JSON)</button>';
+    html += '</div>';
+    html += '<div class="export-note">CSV files open directly in Numbers, Excel, or Google Sheets for a closer look. The JSON backup keeps everything in one file \u2014 all readings, rain history, and today\u2019s in-progress check. All three are read-only exports; nothing saved on this device is changed, cleared, or removed.</div>';
+    html += '</div></div>';
+
     const footerBits = [];
     footerBits.push(sorted.length + ' saved plant session' + (sorted.length === 1 ? '' : 's') + (newest ? ', most recent: ' + newest.label : ''));
     footerBits.push(sortedRain.length + ' saved rain entr' + (sortedRain.length === 1 ? 'y' : 'ies'));
@@ -2100,6 +2139,101 @@
     return { totalEvents, light, moderate, heavy, daysSinceLastRain };
   }
 
+
+  // ---- Export ----
+  // All three functions are read-only: they load from localStorage and
+  // trigger a download, but never write, clear, or modify saved data.
+
+  function toCSVField(value) {
+    if (value === null || value === undefined) return '';
+    const str = String(value);
+    if (/[",\n]/.test(str)) return '"' + str.replace(/"/g, '""') + '"';
+    return str;
+  }
+
+  function rowsToCSV(rows) {
+    return rows.map(row => row.map(toCSVField).join(',')).join('\r\n');
+  }
+
+  function downloadBlob(filename, content, mime) {
+    try {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      return true;
+    } catch (e) {
+      alert('Export failed: ' + e.message);
+      return false;
+    }
+  }
+
+  function flashExportBtn(id, label) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    const original = btn.textContent;
+    btn.textContent = label;
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1800);
+  }
+
+  function exportMoistureCSV() {
+    const history = [...loadHistory()].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+    const rows = [['Date/Time', 'Session', 'Plant', 'Instance', 'Reading', 'Action', 'Note']];
+    history.forEach(entry => {
+      const dateStr = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '';
+      const values = entry.raw ? Object.values(entry.raw) : [];
+      if (values.length === 0) {
+        rows.push([dateStr, entry.label, '', '', '', 'Weather check only \u2014 no plant readings', '']);
+      } else {
+        values.forEach(r => {
+          const zoneLabel = r.zone === 0 ? 'Dry (Red)' : r.zone === 1 ? 'Moist (Green)' : 'Wet (Blue)';
+          const action = r.zone === 0 ? 'Watered' : r.zone === 1 ? 'Held off' : 'Skipped, too wet';
+          rows.push([dateStr, entry.label, PLANT_LABELS[r.plant] || r.plant, r.label, zoneLabel, action, '']);
+        });
+      }
+      if (entry.mgNotes) {
+        rows.push([dateStr, entry.label, 'Monkey Grass', '', '', 'Note', entry.mgNotes]);
+      }
+    });
+    const ok = downloadBlob('garden-moisture-history-' + todayDateKey() + '.csv', rowsToCSV(rows), 'text/csv');
+    if (ok) flashExportBtn('exportMoistureBtn', 'Downloaded');
+  }
+
+  function exportRainCSV() {
+    const history = [...loadRainHistory()].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+    const rows = [['Date', 'Saved At', 'Rain?', 'Event #', 'Start Time', 'Duration', 'Intensity']];
+    history.forEach(entry => {
+      const savedAt = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '';
+      const dateKey = entry.dateKey || (entry.timestamp ? new Date(entry.timestamp).toLocaleDateString('en-CA') : '');
+      if (!entry.occurred || !entry.events || entry.events.length === 0) {
+        rows.push([dateKey, savedAt, 'No', '', '', '', '']);
+      } else {
+        entry.events.forEach((ev, i) => {
+          rows.push([dateKey, savedAt, 'Yes', i + 1, ev.time || '', ev.duration || '', ev.intensity || '']);
+        });
+      }
+    });
+    const ok = downloadBlob('garden-rain-history-' + todayDateKey() + '.csv', rowsToCSV(rows), 'text/csv');
+    if (ok) flashExportBtn('exportRainBtn', 'Downloaded');
+  }
+
+  function exportFullBackupJSON() {
+    const backup = {
+      exportedAt: new Date().toISOString(),
+      moistureHistory: loadHistory(),
+      rainHistory: loadRainHistory(),
+      rainDraftToday: getRainState(),
+      todayPlantCheckDraft: loadState()
+    };
+    const ok = downloadBlob('garden-tracker-backup-' + todayDateKey() + '.json', JSON.stringify(backup, null, 2), 'application/json');
+    if (ok) flashExportBtn('exportJsonBtn', 'Downloaded');
+  }
 
   function showTab(tab) {
     document.getElementById('checkTab').classList.toggle('active', tab === 'check');
