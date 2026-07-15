@@ -1024,13 +1024,13 @@
 
 <section class="plants" id="plantList">
 
-  <div class="plant-card" data-plant="blueberries">
+  <div class="plant-card" data-plant="bluedaze">
     <div class="plant-head">
-      <div class="plant-name">Blueberries <span class="risk-tag risk-high">High risk</span></div>
-      <div class="plant-meta">Planted Fri &middot; day 3 &middot; amended acid pocket only</div>
+      <div class="plant-name">Blue Daze <span class="canary">Bed canary</span></div>
+      <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
-    <div class="probe-note">Probe inside each plant's own amended pocket only &mdash; never the surrounding sand.</div>
-    <div class="instance-list" data-labels="#1,#2"></div>
+    <div class="probe-note">Check #1 first &mdash; if it reads dry, the whole bed likely is, and you can move faster through the rest.</div>
+    <div class="instance-list" data-labels="#1,#2,#3,#4,#5"></div>
     <div class="card-summary"></div>
   </div>
 
@@ -1044,13 +1044,13 @@
     <div class="card-summary"></div>
   </div>
 
-  <div class="plant-card" data-plant="bluedaze">
+  <div class="plant-card" data-plant="blueberries">
     <div class="plant-head">
-      <div class="plant-name">Blue Daze <span class="canary">Bed canary</span></div>
-      <div class="plant-meta">Planted Sat &middot; day 2</div>
+      <div class="plant-name">Blueberries <span class="risk-tag risk-high">High risk</span></div>
+      <div class="plant-meta">Planted Fri &middot; day 3 &middot; amended acid pocket only</div>
     </div>
-    <div class="probe-note">Check #1 first &mdash; if it reads dry, the whole bed likely is, and you can move faster through the rest.</div>
-    <div class="instance-list" data-labels="#1,#2,#3,#4,#5"></div>
+    <div class="probe-note">Probe inside each plant's own amended pocket only &mdash; never the surrounding sand.</div>
+    <div class="instance-list" data-labels="#1,#2"></div>
     <div class="card-summary"></div>
   </div>
 
@@ -1069,8 +1069,8 @@
       <div class="plant-name">Monkey Grass Ring</div>
       <div class="plant-meta">Relocated Sun &middot; day 1</div>
     </div>
-    <div class="probe-note">One continuous planting, not individual plants &mdash; spot-check 3 points around the ring, 2&ndash;3" deep.</div>
-    <div class="instance-list" data-labels="Spot A,Spot B,Spot C"></div>
+    <div class="probe-note">One continuous planting, not individual plants &mdash; spot-check 4 points around the ring, 2&ndash;3" deep.</div>
+    <div class="instance-list" data-labels="Spot A,Spot B,Spot C,Spot D"></div>
     <div class="notes-field">
       <label for="monkeygrassNotes">Notes &mdash; where's it moist vs. dry?</label>
       <textarea id="monkeygrassNotes" rows="2" placeholder="e.g. dry near the mailbox end, moist by the crepe myrtle side"></textarea>
@@ -1095,6 +1095,16 @@
     </div>
     <div class="probe-note">No soil probe here &mdash; check rooting medium surface by feel/sight only.</div>
     <div class="instance-list" data-labels="#1" data-dwm="1"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="shrimpplant">
+    <div class="plant-head">
+      <div class="plant-name">Shrimp Plant <span class="risk-tag risk-med">Medium risk</span></div>
+      <div class="plant-meta">Planted Wed 7/15 &middot; day 0 &middot; pool cage rock border, part shade after ~1-2pm</div>
+    </div>
+    <div class="probe-note">Probe at root ball edge, 2&ndash;3" deep. New plantings, not yet established &mdash; follow the same 2x/day taper as the other weekend plantings.</div>
+    <div class="instance-list" data-labels="#1,#2"></div>
     <div class="card-summary"></div>
   </div>
 
@@ -1156,7 +1166,10 @@
                    blue: "action-skip", blueText: "Skip. Let it dry before next check." },
     firespike:   { red: "action-water", redText: "Lightly moisten the rooting medium \u2014 don't soak.",
                    green: "action-hold", greenText: "Good \u2014 evenly moist is the target, leave it.",
-                   blue: "action-skip", blueText: "Ease up. Check stem base for blackening/mushiness before adding more." }
+                   blue: "action-skip", blueText: "Ease up. Check stem base for blackening/mushiness before adding more." },
+    shrimpplant: { red: "action-water", redText: "Water now, soak at root ball edge (2-3\").",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 shrimp plants don't like soggy roots." }
   };
 
   const ZONE_LABELS_STD = ['RED', 'GREEN', 'BLUE'];
@@ -1852,14 +1865,14 @@
   const PLANT_LABELS = {
     firebush: 'Firebush', blueberries: 'Blueberries', pentas: 'Pentas',
     bluedaze: 'Blue Daze', coontie: 'Coontie', monkeygrass: 'Monkey Grass',
-    firespike: 'Firespike Cutting'
+    firespike: 'Firespike Cutting', shrimpplant: 'Shrimp Plant'
   };
 
   // Planting dates used to auto-compute taper stage (edit here if dates change)
   const PLANT_DATES = {
     firebush: '2026-07-10', blueberries: '2026-07-10', pentas: '2026-07-11',
     bluedaze: '2026-07-11', coontie: '2026-07-11', monkeygrass: '2026-07-12',
-    firespike: '2026-07-11'
+    firespike: '2026-07-11', shrimpplant: '2026-07-15'
   };
 
   function daysSince(dateStr) {
