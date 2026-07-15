@@ -1888,6 +1888,40 @@
     return { label: 'Established, spot check', cls: 'stage-established' };
   }
 
+  // Verb differs for a couple of plants (monkey grass was relocated, not
+  // freshly planted). Defaults to 'Planted' if not listed here.
+  const PLANT_VERB = { monkeygrass: 'Relocated' };
+
+  // Any extra context that used to be hardcoded alongside the date/day count.
+  const PLANT_META_EXTRA = {
+    blueberries: 'amended acid pocket only',
+    firebush: 'north side of house',
+    firespike: 'no root system yet',
+    shrimpplant: 'pool cage rock border, part shade after ~1-2pm'
+  };
+
+  function formatPlantMeta(plant) {
+    const dateStr = PLANT_DATES[plant];
+    if (!dateStr) return '';
+    const days = daysSince(dateStr);
+    const then = new Date(dateStr + 'T00:00:00');
+    const dateLabel = then.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const verb = PLANT_VERB[plant] || 'Planted';
+    const dayLabel = days <= 0 ? 'day 0 (today)' : 'day ' + days;
+    let meta = verb + ' ' + dateLabel + ' \u00b7 ' + dayLabel;
+    if (PLANT_META_EXTRA[plant]) meta += ' \u00b7 ' + PLANT_META_EXTRA[plant];
+    return meta;
+  }
+
+  function updateAllPlantMeta() {
+    document.querySelectorAll('.plant-card').forEach(card => {
+      const plant = card.dataset.plant;
+      const metaEl = card.querySelector('.plant-meta');
+      if (metaEl && PLANT_DATES[plant]) metaEl.textContent = formatPlantMeta(plant);
+    });
+  }
+  updateAllPlantMeta();
+
   function renderMetrics() {
     const history = loadHistory();
     const rainHistory = loadRainHistory();
