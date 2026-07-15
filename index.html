@@ -894,6 +894,71 @@
   .stage-eod { background: #d8e6ef; color: var(--wet); }
   .stage-established { background: #dfe9df; color: var(--leaf); }
 
+  .care-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--sand);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .care-item:first-child { padding-top: 0; }
+  .care-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .care-item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .care-item-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--soil);
+    line-height: 1.4;
+  }
+
+  .care-item-detail {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+
+  .care-status {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .care-status.due { background: #f0d3c8; color: var(--danger); }
+  .care-status.pending { background: #f0e2c8; color: var(--clay); }
+  .care-status.done { background: #dfe9df; color: var(--leaf); }
+
+  .care-btn {
+    display: inline-block;
+    margin-top: 9px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--paper);
+    background: var(--leaf);
+    border: none;
+    border-radius: 16px;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+
+  .care-btn.secondary { background: var(--wet); }
+  .care-btn.done-btn { background: var(--bark); }
+
+  .care-log-list { margin-top: 8px; font-size: 11.5px; color: var(--ink-soft); }
+  .care-log-entry { padding: 4px 0; border-top: 1px dashed var(--sand); }
+  .care-log-entry:first-child { border-top: none; }
+
   .rain-stat-row {
     display: flex;
     justify-content: space-between;
@@ -943,6 +1008,7 @@
   }
 
   .tab-btn {
+    position: relative;
     font-family: 'Helvetica Neue', Arial, sans-serif;
     font-size: 12.5px;
     font-weight: 700;
@@ -952,6 +1018,18 @@
     border-radius: 20px;
     padding: 7px 16px;
     cursor: pointer;
+  }
+
+  .tab-dot {
+    display: none;
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 2px solid var(--soil);
   }
 
   .tab-btn.active {
@@ -971,6 +1049,7 @@
   <div class="sub">Log each individual plant &mdash; groups can read differently plant to plant</div>
   <div class="tabs">
     <button class="tab-btn active" id="tabBtnCheck" onclick="showTab('check')">Moisture Check</button>
+    <button class="tab-btn" id="tabBtnCare" onclick="showTab('care')">Care Tasks<span class="tab-dot" id="careDot"></span></button>
     <button class="tab-btn" id="tabBtnMetrics" onclick="showTab('metrics')">Patterns &amp; Metrics</button>
   </div>
 </header>
@@ -1135,6 +1214,10 @@
 <div class="footer-note">
   Coontie and blueberries stay on separate watering tracks &mdash; don't fold their readings into the general bed decision.
 </div>
+</div>
+
+<div class="tab-panel" id="careTab">
+<div id="careApp"></div>
 </div>
 
 <div class="tab-panel" id="metricsTab">
@@ -1922,6 +2005,264 @@
   }
   updateAllPlantMeta();
 
+  // ---- Care Tasks (non-watering care: pinching, pest checks, fertilizer) ----
+  // Separate from the moisture/rain history entirely — this is its own
+  // localStorage store so it survives independent of daily plant checks.
+
+  const CARE_KEY = 'gardenCareTasks';
+
+  function loadCareState() {
+    try {
+      const raw = localStorage.getItem(CARE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function saveCareState(state) {
+    try { localStorage.setItem(CARE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  // Date-aware or checkbox tasks tied to the plants already tracked above.
+  // type "onetime": becomes "due" once the linked plant hits dueDays old.
+  // type "onetime-anytime": no date trigger, just available to check off now.
+  // type "recurring": repeatable log (e.g. a pest check) with a re-due window.
+  const CARE_TASKS = [
+    { id: 'pentas-pinch', plant: 'pentas', type: 'onetime', dueDays: 21,
+      label: 'Pentas \u2014 first pinch and deadhead pass',
+      detail: 'Tip-pinch new growth to force branching; remove spent blooms.' },
+    { id: 'shrimp-pinch', plant: 'shrimpplant', type: 'onetime', dueDays: 21,
+      label: 'Shrimp Plant \u2014 first pinch and deadhead pass',
+      detail: 'Same approach as pentas \u2014 tip-pinch young growth, deadhead spent bracts.' },
+    { id: 'blueberry-flowers', plant: 'blueberries', type: 'onetime-anytime',
+      label: 'Blueberries \u2014 remove first-season flowers/fruit',
+      detail: 'Removing early blooms lets the plant put energy into root establishment instead of fruiting this first year.' },
+    { id: 'coontie-scale', plant: 'coontie', type: 'recurring', recurDays: 30,
+      label: 'Coontie \u2014 scale check',
+      detail: 'Check fronds for cycad scale (small white/waxy insects) \u2014 the main coontie pest in Florida.' }
+  ];
+
+  // Ongoing/as-needed items \u2014 no due date logic, just reference notes.
+  const CARE_NOTES = [
+    { label: 'Blue Daze', detail: 'Shear back if it gets leggy/vine-y rather than staying mounded. As-needed, once established \u2014 tolerant of a hard trim.' },
+    { label: 'Monkey Grass Ring', detail: 'Trim ragged/browning tips as needed. Can cut back hard in late winter before the spring flush if it ever looks tired.' },
+    { label: 'Firebush (north side)', detail: 'Light tip-pruning for shape once established \u2014 optional, not urgent, already blooming well.' },
+    { label: 'Firespike Cutting', detail: 'Hold off on any fertilizer until rooting is confirmed (visible new top growth).' }
+  ];
+
+  function careStatusHtml(task, rec) {
+    if (task.type === 'onetime') {
+      const days = PLANT_DATES[task.plant] !== undefined ? daysSince(PLANT_DATES[task.plant]) : null;
+      if (rec.done) {
+        const d = new Date(rec.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        return '<span class="care-status done">Done ' + d + '</span>';
+      }
+      if (days !== null && days >= task.dueDays) return '<span class="care-status due">Due now (day ' + days + ')</span>';
+      return '<span class="care-status pending">Day ' + (days === null ? '?' : days) + ' of ' + task.dueDays + '</span>';
+    }
+    if (task.type === 'onetime-anytime') {
+      if (rec.done) {
+        const d = new Date(rec.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        return '<span class="care-status done">Done ' + d + '</span>';
+      }
+      return '<span class="care-status pending">Available now</span>';
+    }
+    if (task.type === 'recurring') {
+      const logs = rec.logs || [];
+      if (logs.length === 0) return '<span class="care-status pending">Never logged</span>';
+      const daysSinceLog = Math.floor((Date.now() - logs[logs.length - 1]) / 86400000);
+      if (daysSinceLog >= task.recurDays) return '<span class="care-status due">Due \u2014 ' + daysSinceLog + ' days since last check</span>';
+      return '<span class="care-status done">Checked ' + daysSinceLog + ' day' + (daysSinceLog === 1 ? '' : 's') + ' ago</span>';
+    }
+    return '';
+  }
+
+  function careBodyExtraHtml(task, rec) {
+    if (task.type === 'onetime' || task.type === 'onetime-anytime') {
+      return '<button class="care-btn' + (rec.done ? ' done-btn' : '') + '" onclick="toggleCareTask(\'' + task.id + '\')">' +
+        (rec.done ? 'Mark not done' : 'Mark done') + '</button>';
+    }
+    if (task.type === 'recurring') {
+      const logs = rec.logs || [];
+      let html = '<button class="care-btn secondary" onclick="logRecurringCare(\'' + task.id + '\')">Log check now</button>';
+      if (logs.length) {
+        html += '<div class="care-log-list">' + logs.slice(-4).reverse().map(ts =>
+          '<div class="care-log-entry">' + new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + '</div>'
+        ).join('') + '</div>';
+      }
+      return html;
+    }
+    return '';
+  }
+
+  const SAGO_KEY = 'gardenSagoCare';
+
+  // Re-check windows for sago's two standalone logs (no watering, no
+  // planting date \u2014 just periodic care actions on their own clock).
+  const SAGO_FERT_INTERVAL_DAYS = 105;   // ~3.5 months, middle of the 3-4 month guidance
+  const SAGO_FROND_INTERVAL_DAYS = 14;   // watch for the post-fertilizer flush
+
+  function loadSagoState() {
+    try {
+      const raw = localStorage.getItem(SAGO_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    // First run: seed with the known 7/14 fertilizer application so the log
+    // isn't empty, then persist it so it's stable across reloads.
+    const seeded = { fertilizeLog: [new Date('2026-07-14T00:00:00').getTime()], frondCheckLog: [] };
+    saveSagoState(seeded);
+    return seeded;
+  }
+
+  function saveSagoState(state) {
+    try { localStorage.setItem(SAGO_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  // Shared status-badge logic for a recurring log (used by both sago logs).
+  function sagoLogStatusHtml(log, intervalDays) {
+    if (!log.length) return '<span class="care-status pending">Never logged</span>';
+    const daysSinceLog = Math.floor((Date.now() - log[log.length - 1]) / 86400000);
+    if (daysSinceLog >= intervalDays) return '<span class="care-status due">Due \u2014 ' + daysSinceLog + ' days since last</span>';
+    return '<span class="care-status done">' + daysSinceLog + ' day' + (daysSinceLog === 1 ? '' : 's') + ' ago \u2014 next due in ' + (intervalDays - daysSinceLog) + '</span>';
+  }
+
+  function sagoLogIsDue(log, intervalDays) {
+    if (!log.length) return true;
+    const daysSinceLog = Math.floor((Date.now() - log[log.length - 1]) / 86400000);
+    return daysSinceLog >= intervalDays;
+  }
+
+  function logSagoFertilize() {
+    const state = loadSagoState();
+    state.fertilizeLog.push(Date.now());
+    saveSagoState(state);
+    renderCareTasks();
+    updateCareDot();
+  }
+
+  function logSagoFrondCheck() {
+    const state = loadSagoState();
+    state.frondCheckLog.push(Date.now());
+    saveSagoState(state);
+    renderCareTasks();
+    updateCareDot();
+  }
+
+  function toggleCareTask(id) {
+    const state = loadCareState();
+    const rec = state[id] || {};
+    state[id] = rec.done ? { done: false } : { done: true, completedAt: Date.now() };
+    saveCareState(state);
+    renderCareTasks();
+    updateCareDot();
+  }
+
+  function logRecurringCare(id) {
+    const state = loadCareState();
+    const rec = state[id] || {};
+    if (!rec.logs) rec.logs = [];
+    rec.logs.push(Date.now());
+    state[id] = rec;
+    saveCareState(state);
+    renderCareTasks();
+    updateCareDot();
+  }
+
+  // Counts outstanding scheduled tasks: a onetime task once its plant hits
+  // dueDays old, a onetime-anytime task any time it isn't checked off yet,
+  // a recurring task once its re-check window has elapsed (or it's never
+  // been logged at all), plus sago's fertilize and frond-check logs on
+  // their own recurring windows.
+  function careTasksDueCount() {
+    const state = loadCareState();
+    let count = 0;
+    CARE_TASKS.forEach(task => {
+      const rec = state[task.id] || {};
+      if (task.type === 'onetime') {
+        const days = PLANT_DATES[task.plant] !== undefined ? daysSince(PLANT_DATES[task.plant]) : null;
+        if (!rec.done && days !== null && days >= task.dueDays) count++;
+      } else if (task.type === 'onetime-anytime') {
+        if (!rec.done) count++;
+      } else if (task.type === 'recurring') {
+        const logs = rec.logs || [];
+        if (logs.length === 0) count++;
+        else {
+          const daysSinceLog = Math.floor((Date.now() - logs[logs.length - 1]) / 86400000);
+          if (daysSinceLog >= task.recurDays) count++;
+        }
+      }
+    });
+    const sago = loadSagoState();
+    if (sagoLogIsDue(sago.fertilizeLog, SAGO_FERT_INTERVAL_DAYS)) count++;
+    if (sagoLogIsDue(sago.frondCheckLog, SAGO_FROND_INTERVAL_DAYS)) count++;
+    return count;
+  }
+
+  function updateCareDot() {
+    const dot = document.getElementById('careDot');
+    if (!dot) return;
+    dot.style.display = careTasksDueCount() > 0 ? 'block' : 'none';
+  }
+
+  updateCareDot();
+
+  function renderCareTasks() {
+    const state = loadCareState();
+    const sago = loadSagoState();
+    const app = document.getElementById('careApp');
+    if (!app) return;
+
+    let html = '';
+
+    html += '<h2 class="section-title">Scheduled Care Tasks</h2>';
+    html += '<div class="card"><div class="card-inner">';
+    CARE_TASKS.forEach(task => {
+      const rec = state[task.id] || {};
+      html += '<div class="care-item">';
+      html += '<div class="care-item-head"><span class="care-item-title">' + task.label + '</span>' + careStatusHtml(task, rec) + '</div>';
+      html += '<div class="care-item-detail">' + task.detail + '</div>';
+      html += careBodyExtraHtml(task, rec);
+      html += '</div>';
+    });
+    html += '</div></div>';
+
+    html += '<h2 class="section-title">Ongoing / As-Needed Notes</h2>';
+    html += '<div class="card"><div class="card-inner">';
+    CARE_NOTES.forEach(note => {
+      html += '<div class="care-item"><div class="care-item-title">' + note.label + '</div><div class="care-item-detail">' + note.detail + '</div></div>';
+    });
+    html += '</div></div>';
+
+    html += '<h2 class="section-title">Sago Palm <span style="text-transform:none;letter-spacing:0;font-weight:400;">(standalone \u2014 not water-tracked)</span></h2>';
+    html += '<div class="card"><div class="card-inner">';
+
+    html += '<div class="care-item">';
+    html += '<div class="care-item-head"><span class="care-item-title">Fertilizer log</span>' + sagoLogStatusHtml(sago.fertilizeLog, SAGO_FERT_INTERVAL_DAYS) + '</div>';
+    html += '<div class="care-item-detail">Guidance is every 3\u20134 months \u2014 flagged as due around the ' + SAGO_FERT_INTERVAL_DAYS + '-day mark.</div>';
+    html += '<button class="care-btn" onclick="logSagoFertilize()">Log fertilizer application</button>';
+    if (sago.fertilizeLog.length) {
+      html += '<div class="care-log-list">' + sago.fertilizeLog.slice(-5).reverse().map(ts =>
+        '<div class="care-log-entry">' + new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + '</div>'
+      ).join('') + '</div>';
+    }
+    html += '</div>';
+
+    html += '<div class="care-item">';
+    html += '<div class="care-item-head"><span class="care-item-title">Frond check log</span>' + sagoLogStatusHtml(sago.frondCheckLog, SAGO_FROND_INTERVAL_DAYS) + '</div>';
+    html += '<div class="care-item-detail">Remove fully brown/dead fronds at the base; leave yellowing-but-not-fully-brown fronds alone. Watch for a new frond flush as the sign the fertilizer is working \u2014 flagged every ' + SAGO_FROND_INTERVAL_DAYS + ' days.</div>';
+    html += '<button class="care-btn secondary" onclick="logSagoFrondCheck()">Log frond check</button>';
+    if (sago.frondCheckLog.length) {
+      html += '<div class="care-log-list">' + sago.frondCheckLog.slice(-5).reverse().map(ts =>
+        '<div class="care-log-entry">' + new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + '</div>'
+      ).join('') + '</div>';
+    }
+    html += '</div>';
+
+    html += '</div></div>';
+
+    app.innerHTML = html;
+  }
+
+
   function renderMetrics() {
     const history = loadHistory();
     const rainHistory = loadRainHistory();
@@ -2285,9 +2626,12 @@
   function showTab(tab) {
     document.getElementById('checkTab').classList.toggle('active', tab === 'check');
     document.getElementById('metricsTab').classList.toggle('active', tab === 'metrics');
+    document.getElementById('careTab').classList.toggle('active', tab === 'care');
     document.getElementById('tabBtnCheck').classList.toggle('active', tab === 'check');
     document.getElementById('tabBtnMetrics').classList.toggle('active', tab === 'metrics');
+    document.getElementById('tabBtnCare').classList.toggle('active', tab === 'care');
     if (tab === 'metrics') renderMetrics();
+    if (tab === 'care') renderCareTasks();
   }
 </script>
 
