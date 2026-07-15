@@ -1964,11 +1964,84 @@
     return Math.floor((now - then) / 86400000);
   }
 
-  function taperStage(days) {
+  // Per-plant taper timeline type. Anything not listed defaults to 'generic'
+  // (monkey grass, pentas, blue daze, shrimp plant all use the generic curve).
+  const TAPER_RULES = {
+    firebush: 'extended',
+    blueberries: 'capped',
+    coontie: 'capped',
+    firespike: 'rooting'
+  };
+
+  // Firebush establishes slower than the weekend annuals/perennials but does
+  // eventually reach spot-check status \u2014 stretched to the middle of the
+  // 60\u201370 day range instead of the generic 28-day cutoff.
+  const FIREBUSH_ESTABLISHED_DAY = 65;
+
+  // Firespike cutting has no root system at planting, so a day-count taper
+  // doesn't apply until rooting is confirmed. Tracked separately from
+  // PLANT_DATES/daysSince \u2014 a rooted flag + its own start timestamp, not a
+  // fork of the planting-date logic (PLANT_DATES stays the single source of
+  // truth for when it was planted).
+  const FIRESPIKE_ROOTING_KEY = 'gardenFirespikeRooting';
+
+  function loadFirespikeRootingState() {
+    try {
+      const raw = localStorage.getItem(FIRESPIKE_ROOTING_KEY);
+      return raw ? JSON.parse(raw) : { rooted: false, rootedAt: null };
+    } catch (e) { return { rooted: false, rootedAt: null }; }
+  }
+
+  function saveFirespikeRootingState(state) {
+    try { localStorage.setItem(FIRESPIKE_ROOTING_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function markFirespikeRooted() {
+    saveFirespikeRootingState({ rooted: true, rootedAt: Date.now() });
+    renderMetrics();
+  }
+
+  function unmarkFirespikeRooted() {
+    saveFirespikeRootingState({ rooted: false, rootedAt: null });
+    renderMetrics();
+  }
+
+  function genericTaperStage(days) {
     if (days <= 7) return { label: '2x/day check', cls: 'stage-2x' };
     if (days <= 14) return { label: '1x/day check', cls: 'stage-1x' };
     if (days <= 28) return { label: 'Every other day', cls: 'stage-eod' };
     return { label: 'Established, spot check', cls: 'stage-established' };
+  }
+
+  function taperStage(plant, days) {
+    const rule = TAPER_RULES[plant] || 'generic';
+
+    if (rule === 'extended') {
+      if (days <= 7) return { label: '2x/day check', cls: 'stage-2x' };
+      if (days <= 14) return { label: '1x/day check', cls: 'stage-1x' };
+      if (days < FIREBUSH_ESTABLISHED_DAY) return { label: 'Every other day', cls: 'stage-eod' };
+      return { label: 'Established, spot check', cls: 'stage-established' };
+    }
+
+    if (rule === 'capped') {
+      // Never auto-advances past the 1x/day tier \u2014 stays high-risk/manual,
+      // matching the separate-track handling this plant already gets
+      // elsewhere in the app (rot risk, not drought risk).
+      if (days <= 7) return { label: '2x/day check', cls: 'stage-2x' };
+      return { label: '1x/day check \u2014 high-risk, stays manual', cls: 'stage-1x' };
+    }
+
+    if (rule === 'rooting') {
+      const rooting = loadFirespikeRootingState();
+      if (!rooting.rooted) {
+        return { label: 'Check for rooting (gentle tug test)', cls: 'stage-2x', hideDayCount: true };
+      }
+      const rootedDays = Math.floor((Date.now() - rooting.rootedAt) / 86400000);
+      const stage = genericTaperStage(rootedDays);
+      return { label: stage.label, cls: stage.cls, dayLabel: 'rooted, day ' + rootedDays };
+    }
+
+    return genericTaperStage(days);
   }
 
   // Verb differs for a couple of plants (monkey grass was relocated, not
@@ -2405,11 +2478,20 @@
     html += '<div class="card"><div class="card-inner">';
     Object.keys(PLANT_DATES).forEach(plant => {
       const days = daysSince(PLANT_DATES[plant]);
-      const stage = taperStage(days);
+      const stage = taperStage(plant, days);
+      const dayLabel = stage.hideDayCount ? '' : (stage.dayLabel || ('day ' + days));
       html += '<div class="taper-row">';
-      html += '<div><div class="taper-name">' + (PLANT_LABELS[plant] || plant) + '</div><div class="taper-days">day ' + days + '</div></div>';
+      html += '<div><div class="taper-name">' + (PLANT_LABELS[plant] || plant) + '</div>' + (dayLabel ? '<div class="taper-days">' + dayLabel + '</div>' : '') + '</div>';
       html += '<span class="taper-stage ' + stage.cls + '">' + stage.label + '</span>';
       html += '</div>';
+      if (plant === 'firespike') {
+        const rooting = loadFirespikeRootingState();
+        html += '<div style="padding:0 0 9px 0;">';
+        html += rooting.rooted
+          ? '<button class="care-btn secondary" onclick="unmarkFirespikeRooted()">Unmark rooted (started ' + new Date(rooting.rootedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ')</button>'
+          : '<button class="care-btn" onclick="markFirespikeRooted()">Mark as rooted \u2014 start taper clock</button>';
+        html += '</div>';
+      }
     });
     html += '</div></div>';
 
