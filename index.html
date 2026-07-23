@@ -1169,10 +1169,10 @@
 
   <div class="plant-card" data-plant="firespike">
     <div class="plant-head">
-      <div class="plant-name">Firespike Cutting <span class="risk-tag risk-med">Different rule</span></div>
+      <div class="plant-name">Firespike Cutting <span class="risk-tag risk-med" id="firespike-risk-tag">Different rule</span></div>
       <div class="plant-meta">Rooting in-ground, no root system yet</div>
     </div>
-    <div class="probe-note">No soil probe here &mdash; check rooting medium surface by feel/sight only.</div>
+    <div class="probe-note" id="firespike-probe-note">No soil probe here &mdash; check rooting medium surface by feel/sight only.</div>
     <div class="instance-list" data-labels="#1" data-dwm="1"></div>
     <div class="card-summary"></div>
   </div>
@@ -1996,13 +1996,33 @@
     try { localStorage.setItem(FIRESPIKE_ROOTING_KEY, JSON.stringify(state)); } catch (e) {}
   }
 
+  // Keeps the probe-note and risk-tag text in sync with rooted state \u2014
+  // these are static HTML by default and won't update on their own.
+  function updateFirespikeCardText() {
+    const rooting = loadFirespikeRootingState();
+    const noteEl = document.getElementById('firespike-probe-note');
+    const tagEl = document.getElementById('firespike-risk-tag');
+    if (noteEl) {
+      noteEl.textContent = rooting.rooted
+        ? 'Probe at root ball edge, 2\u20133" deep \u2014 same taper as other new plantings now that it\u2019s rooted.'
+        : 'No soil probe here \u2014 check rooting medium surface by feel/sight only.';
+    }
+    if (tagEl) {
+      tagEl.textContent = rooting.rooted ? 'Medium risk' : 'Different rule';
+    }
+  }
+
   function markFirespikeRooted() {
     saveFirespikeRootingState({ rooted: true, rootedAt: Date.now() });
+    updateFirespikeCardText();
+    updateAllPlantMeta();
     renderMetrics();
   }
 
   function unmarkFirespikeRooted() {
     saveFirespikeRootingState({ rooted: false, rootedAt: null });
+    updateFirespikeCardText();
+    updateAllPlantMeta();
     renderMetrics();
   }
 
@@ -2065,7 +2085,14 @@
     const verb = PLANT_VERB[plant] || 'Planted';
     const dayLabel = days <= 0 ? 'day 0 (today)' : 'day ' + days;
     let meta = verb + ' ' + dateLabel + ' \u00b7 ' + dayLabel;
-    if (PLANT_META_EXTRA[plant]) meta += ' \u00b7 ' + PLANT_META_EXTRA[plant];
+    if (plant === 'firespike') {
+      const rooting = loadFirespikeRootingState();
+      meta += rooting.rooted
+        ? ' \u00b7 rooted \u2014 following normal new-planting taper'
+        : ' \u00b7 no root system yet';
+    } else if (PLANT_META_EXTRA[plant]) {
+      meta += ' \u00b7 ' + PLANT_META_EXTRA[plant];
+    }
     return meta;
   }
 
@@ -2077,8 +2104,7 @@
     });
   }
   updateAllPlantMeta();
-
-  // ---- Care Tasks (non-watering care: pinching, pest checks, fertilizer) ----
+  updateFirespikeCardText();
   // Separate from the moisture/rain history entirely — this is its own
   // localStorage store so it survives independent of daily plant checks.
 
