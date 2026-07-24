@@ -1108,8 +1108,8 @@
       <div class="plant-name">Blue Daze <span class="canary">Bed canary</span></div>
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
-    <div class="probe-note">Check #1 first &mdash; if it reads dry, the whole bed likely is, and you can move faster through the rest.</div>
-    <div class="instance-list" data-labels="#1,#2,#3,#4,#5"></div>
+    <div class="probe-note">23 total now (5 original + 18 new 7/24) &mdash; grouped into 5 zones instead of checking each plant. Check Zone 1 first &mdash; if it reads dry, the whole run likely is, and you can move faster through the rest.</div>
+    <div class="instance-list" data-labels="Zone 1 - garage end (sidewalk row),Zone 2 - middle (sidewalk row),Zone 3 - walkway end (sidewalk row),Zone 4 - garage end (2nd row, lamps),Zone 5 - walkway end (2nd row, lamps)"></div>
     <div class="card-summary"></div>
   </div>
 
@@ -1118,8 +1118,8 @@
       <div class="plant-name">Pentas</div>
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
-    <div class="probe-note">Probe at root ball edge, 2&ndash;3" deep. End-of-row plants often dry faster than middle ones.</div>
-    <div class="instance-list" data-labels="#1,#2,#3,#4,#5"></div>
+    <div class="probe-note">Probe at root ball edge, 2&ndash;3" deep. End-of-row plants often dry faster than middle ones. <strong>#6 is new (7/24, near lava rock) &mdash; actual day 0, not day 13 like the others</strong>: check it closer to daily regardless of what the shared day-count below says.</div>
+    <div class="instance-list" data-labels="#1,#2,#3,#4,#5,#6 (new 7/24)"></div>
     <div class="card-summary"></div>
   </div>
 
@@ -1159,11 +1159,31 @@
 
   <div class="plant-card" data-plant="firebush">
     <div class="plant-head">
-      <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span></div>
+      <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span> <span class="canary">North Side of House</span></div>
       <div class="plant-meta">Planted Fri &middot; day 3 &middot; north side of house</div>
     </div>
     <div class="probe-note">Probe at root ball edge, 3&ndash;4" deep. Log each plant separately &mdash; a smaller or edge plant can dry faster than the others.</div>
     <div class="instance-list" data-labels="#1,#2,#3"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="firebush2">
+    <div class="plant-head">
+      <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span> <span class="canary">Garage Bed (new)</span></div>
+      <div class="plant-meta">Planted Sat &middot; day 0 &middot; garage wall stretch</div>
+    </div>
+    <div class="probe-note">Separate batch from the North Side firebush &mdash; different bed, different planting date. Probe at root ball edge, 3&ndash;4" deep. Log each plant separately.</div>
+    <div class="instance-list" data-labels="#1,#2,#3"></div>
+    <div class="card-summary"></div>
+  </div>
+
+  <div class="plant-card" data-plant="ixora">
+    <div class="plant-head">
+      <div class="plant-name">Ixora</div>
+      <div class="plant-meta">Planted Fri &middot; day 0 &middot; Garage Bed, in front of saw palmetto stump / downspout</div>
+    </div>
+    <div class="probe-note">First time in-ground &mdash; moved from a patio pot 7/24. Probe at root ball edge, 2&ndash;3" deep. Watch for the boom-bust bloom/blackening pattern it showed in the pot; unclear yet if that carries over in-ground.</div>
+    <div class="instance-list" data-labels="#1"></div>
     <div class="card-summary"></div>
   </div>
 
@@ -1229,6 +1249,9 @@
     firebush:    { red: "action-water", redText: "Water now. Soak the root zone, not the whole bed.",
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
                    blue: "action-skip", blueText: "Skip. Too wet \u2014 watch for yellowing lower leaves or soft stem base." },
+    firebush2:   { red: "action-water", redText: "Water now. Soak the root zone, not the whole bed.",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Too wet \u2014 watch for yellowing lower leaves or soft stem base." },
     blueberries: { red: "action-water", redText: "Deep soak this plant's amended pocket only.",
                    green: "action-hold", greenText: "Hold \u2014 on track for the 2-3x/week schedule.",
                    blue: "action-skip", blueText: "Skip. Yellow leaves with green veins later = pH stress, not water." },
@@ -1252,7 +1275,10 @@
                    blue: "action-skip", blueText: "Ease up. Check stem base for blackening/mushiness before adding more." },
     shrimpplant: { red: "action-water", redText: "Water now, soak at root ball edge (2-3\").",
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
-                   blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 shrimp plants don't like soggy roots." }
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 shrimp plants don't like soggy roots." },
+    ixora:       { red: "action-water", redText: "Water now, soak at root ball edge (2-3\").",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check." }
   };
 
   const ZONE_LABELS_STD = ['RED', 'GREEN', 'BLUE'];
@@ -1946,16 +1972,16 @@
 
 
   const PLANT_LABELS = {
-    firebush: 'Firebush', blueberries: 'Blueberries', pentas: 'Pentas',
+    firebush: 'Firebush (N. Side of House)', firebush2: 'Firebush (Garage Bed, new)', blueberries: 'Blueberries', pentas: 'Pentas',
     bluedaze: 'Blue Daze', coontie: 'Coontie', monkeygrass: 'Monkey Grass',
-    firespike: 'Firespike Cutting', shrimpplant: 'Shrimp Plant'
+    firespike: 'Firespike Cutting', shrimpplant: 'Shrimp Plant', ixora: 'Ixora'
   };
 
   // Planting dates used to auto-compute taper stage (edit here if dates change)
   const PLANT_DATES = {
-    firebush: '2026-07-10', blueberries: '2026-07-10', pentas: '2026-07-11',
-    bluedaze: '2026-07-11', coontie: '2026-07-11', monkeygrass: '2026-07-12',
-    firespike: '2026-07-11', shrimpplant: '2026-07-15'
+    firebush: '2026-07-10', firebush2: '2026-07-26', blueberries: '2026-07-10', pentas: '2026-07-11',
+    bluedaze: '2026-07-24', coontie: '2026-07-11', monkeygrass: '2026-07-12',
+    firespike: '2026-07-11', shrimpplant: '2026-07-15', ixora: '2026-07-24'
   };
 
   function daysSince(dateStr) {
@@ -1968,6 +1994,7 @@
   // (monkey grass, pentas, blue daze, shrimp plant all use the generic curve).
   const TAPER_RULES = {
     firebush: 'extended',
+    firebush2: 'extended',
     blueberries: 'capped',
     coontie: 'capped',
     firespike: 'rooting'
@@ -2072,6 +2099,9 @@
   const PLANT_META_EXTRA = {
     blueberries: 'amended acid pocket only',
     firebush: 'north side of house',
+    firebush2: 'garage wall stretch',
+    ixora: 'Garage Bed, moved from patio pot',
+    bluedaze: '23 total (5 original + 18 new 7/24), grouped into 5 zones',
     firespike: 'no root system yet',
     shrimpplant: 'pool cage rock border, part shade after ~1-2pm'
   };
