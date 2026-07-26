@@ -1179,6 +1179,24 @@
     </div>
     <div class="card-summary"></div>
   </div>
+  <div class="plant-card" data-plant="muhlygrass">
+    <div class="plant-head">
+      <div class="plant-name">Muhly Grass <span class="canary">Front Left Bed</span></div>
+      <div class="plant-meta">Planted Sun &middot; day 0</div>
+    </div>
+    <div class="probe-note">5 clumps, back row: 4 left of the stump, 1 on the far side of the cabbage palms. Native, drought-tolerant once established &mdash; but still a fresh planting, so follow the normal new-planting taper for now. Probe at root ball edge, 2&ndash;3" deep.</div>
+    <div class="instance-list" data-labels="Clump 1,Clump 2,Clump 3,Clump 4,Clump 5 (far side, cabbage palms)"></div>
+    <div class="card-summary"></div>
+  </div>
+  <div class="plant-card" data-plant="monkeygrass2">
+    <div class="plant-head">
+      <div class="plant-name">Monkey Grass <span class="canary">Garage Bed, new</span></div>
+      <div class="plant-meta">Relocated Sun &middot; day 0</div>
+    </div>
+    <div class="probe-note">Single clump transplanted from Front Left Bed (behind the sago) into the crepe myrtle area of the Garage Bed. Separate from the established Monkey Grass Ring below &mdash; different bed, different date. Transplant-stress watch: probe at root ball edge, 2&ndash;3" deep.</div>
+    <div class="instance-list" data-labels="Crepe myrtle clump"></div>
+    <div class="card-summary"></div>
+  </div>
   <div class="plant-card" data-plant="firebush">
     <div class="plant-head">
       <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span> <span class="canary">North Side of House</span></div>
@@ -1287,6 +1305,12 @@
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
                    blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 shrimp plants don't like soggy roots." },
     ixora:       { red: "action-water", redText: "Water now, soak at root ball edge (2-3\").",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check." },
+    muhlygrass:  { red: "action-water", redText: "Water now, soak at root ball edge (2-3\").",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check." },
+    monkeygrass2:{ red: "action-water", redText: "Water now, soak at root ball edge (2-3\") \u2014 fresh transplant, treat like a new planting.",
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
                    blue: "action-skip", blueText: "Skip. Let it dry before next check." }
   };
@@ -1985,7 +2009,8 @@
     bluedaze: 'Blue Daze', pentas: 'Pentas', ixora: 'Ixora', blueberries: 'Blueberries',
     firebush2: 'Firebush (Garage Bed, new)', cordyline: 'Ti Plants (Cordyline)', coontie: 'Coontie',
     monkeygrass: 'Monkey Grass', firebush: 'Firebush (N. Side of House)',
-    firespike: 'Firespike Cutting', shrimpplant: 'Shrimp Plant'
+    firespike: 'Firespike Cutting', shrimpplant: 'Shrimp Plant',
+    muhlygrass: 'Muhly Grass (Front Left Bed)', monkeygrass2: 'Monkey Grass (Garage Bed, new)'
   };
 
   // Planting dates used to auto-compute taper stage (edit here if dates change)
@@ -1993,7 +2018,8 @@
     bluedaze: '2026-07-24', pentas: '2026-07-11', ixora: '2026-07-24', blueberries: '2026-07-10',
     firebush2: '2026-07-25', cordyline: '2026-07-25', coontie: '2026-07-11',
     monkeygrass: '2026-07-12', firebush: '2026-07-10',
-    firespike: '2026-07-11', shrimpplant: '2026-07-15'
+    firespike: '2026-07-11', shrimpplant: '2026-07-15',
+    muhlygrass: '2026-07-26', monkeygrass2: '2026-07-26'
   };
 
   function daysSince(dateStr) {
@@ -2105,7 +2131,7 @@
 
   // Verb differs for a couple of plants (monkey grass was relocated, not
   // freshly planted). Defaults to 'Planted' if not listed here.
-  const PLANT_VERB = { monkeygrass: 'Relocated', cordyline: 'Moved' };
+  const PLANT_VERB = { monkeygrass: 'Relocated', cordyline: 'Moved', monkeygrass2: 'Relocated' };
 
   // Any extra context that used to be hardcoded alongside the date/day count.
   const PLANT_META_EXTRA = {
@@ -2113,7 +2139,9 @@
     firebush: 'north side of house',
     bluedaze: '23 total (5 original + 18 new 7/24), grouped into 5 zones',
     firespike: 'no root system yet',
-    shrimpplant: 'pool cage rock border, part shade after ~1-2pm'
+    shrimpplant: 'pool cage rock border, part shade after ~1-2pm',
+    muhlygrass: '5 clumps, back row',
+    monkeygrass2: 'from Front Left Bed (behind sago), fills gap near crepe myrtle'
   };
 
   function formatPlantMeta(plant) {
