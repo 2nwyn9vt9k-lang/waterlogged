@@ -1109,7 +1109,7 @@
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
     <div class="probe-note">23 total now (5 original + 18 new 7/24) &mdash; grouped into 5 zones instead of checking each plant. Check Zone 1 first &mdash; if it reads dry, the whole run likely is, and you can move faster through the rest.</div>
-    <div class="instance-list" data-labels="Zone 1 - garage end (sidewalk row),Zone 2 - middle (sidewalk row),Zone 3 - walkway end (sidewalk row),Zone 4 - garage end (2nd row, lamps),Zone 5 - walkway end (2nd row, lamps)"></div>
+    <div class="instance-list" data-labels="Zone 1 - garage end (sidewalk row),Zone 2 - middle (sidewalk row),Zone 3 - walkway end (sidewalk row),Zone 4 - garage end (2nd row - lamps),Zone 5 - walkway end (2nd row - lamps)"></div>
     <div class="card-summary"></div>
   </div>
   <div class="plant-card" data-plant="pentas">
@@ -1157,6 +1157,15 @@
     <div class="instance-list" data-labels="#1,#2,#3,#4,#5"></div>
     <div class="card-summary"></div>
   </div>
+  <div class="plant-card" data-plant="monkeygrass2">
+    <div class="plant-head">
+      <div class="plant-name">Monkey Grass <span class="canary">Garage Bed, new</span></div>
+      <div class="plant-meta">Relocated Sun &middot; day 0</div>
+    </div>
+    <div class="probe-note">Single clump transplanted from Front Left Bed (behind the sago) into the crepe myrtle area of the Garage Bed. Transplant-stress watch: probe at root ball edge, 2&ndash;3" deep.</div>
+    <div class="instance-list" data-labels="Crepe myrtle clump"></div>
+    <div class="card-summary"></div>
+  </div>
   <div class="plant-card" data-plant="coontie">
     <div class="plant-head">
       <div class="plant-name">Coontie <span class="risk-tag risk-high">Rot risk</span></div>
@@ -1166,35 +1175,13 @@
     <div class="instance-list" data-labels="#1,#2"></div>
     <div class="card-summary"></div>
   </div>
-  <div class="plant-card" data-plant="monkeygrass">
-    <div class="plant-head">
-      <div class="plant-name">Monkey Grass Ring</div>
-      <div class="plant-meta">Relocated Sun &middot; day 1</div>
-    </div>
-    <div class="probe-note">One continuous planting, not individual plants &mdash; spot-check 4 points around the ring, 2&ndash;3" deep.</div>
-    <div class="instance-list" data-labels="Spot A,Spot B,Spot C,Spot D"></div>
-    <div class="notes-field">
-      <label for="monkeygrassNotes">Notes &mdash; where's it moist vs. dry?</label>
-      <textarea id="monkeygrassNotes" rows="2" placeholder="e.g. dry near the mailbox end, moist by the crepe myrtle side"></textarea>
-    </div>
-    <div class="card-summary"></div>
-  </div>
   <div class="plant-card" data-plant="muhlygrass">
     <div class="plant-head">
       <div class="plant-name">Muhly Grass <span class="canary">Front Left Bed</span></div>
       <div class="plant-meta">Planted Sun &middot; day 0</div>
     </div>
     <div class="probe-note">5 clumps, back row: 4 left of the stump, 1 on the far side of the cabbage palms. Native, drought-tolerant once established &mdash; but still a fresh planting, so follow the normal new-planting taper for now. Probe at root ball edge, 2&ndash;3" deep.</div>
-    <div class="instance-list" data-labels="Clump 1,Clump 2,Clump 3,Clump 4,Clump 5 (far side, cabbage palms)"></div>
-    <div class="card-summary"></div>
-  </div>
-  <div class="plant-card" data-plant="monkeygrass2">
-    <div class="plant-head">
-      <div class="plant-name">Monkey Grass <span class="canary">Garage Bed, new</span></div>
-      <div class="plant-meta">Relocated Sun &middot; day 0</div>
-    </div>
-    <div class="probe-note">Single clump transplanted from Front Left Bed (behind the sago) into the crepe myrtle area of the Garage Bed. Separate from the established Monkey Grass Ring below &mdash; different bed, different date. Transplant-stress watch: probe at root ball edge, 2&ndash;3" deep.</div>
-    <div class="instance-list" data-labels="Crepe myrtle clump"></div>
+    <div class="instance-list" data-labels="Clump 1,Clump 2,Clump 3,Clump 4,Clump 5 (far side of cabbage palms)"></div>
     <div class="card-summary"></div>
   </div>
   <div class="plant-card" data-plant="firebush">
@@ -1292,9 +1279,6 @@
     coontie:     { red: "action-water", redText: "Only if truly dry at the root edge \u2014 deep soak, separate track.",
                    green: "action-hold", greenText: "Hold. This is the target zone \u2014 leave it alone.",
                    blue: "action-skip", blueText: "Skip. Coontie tolerates dry far better than wet \u2014 do not water." },
-    monkeygrass: { red: "action-water", redText: "Optional light water \u2014 monkey grass is tough, browning tips will tell you if it's truly stressed.",
-                   green: "action-hold", greenText: "Hold, likely fine to skip this check entirely.",
-                   blue: "action-skip", blueText: "Skip." },
     lemon:       { red: "action-water", redText: "Water now, soak at root ball edge.",
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
                    blue: "action-skip", blueText: "Skip. Let it dry before next check." },
@@ -1388,15 +1372,6 @@
     });
 
     updateCardSummary(card, summaryEl);
-  });
-
-  const mgNotesEl = document.getElementById('monkeygrassNotes');
-  const savedForNotes = loadState();
-  if (savedForNotes.notes.monkeygrass) mgNotesEl.value = savedForNotes.notes.monkeygrass;
-  mgNotesEl.addEventListener('input', () => {
-    const state = loadState();
-    state.notes.monkeygrass = mgNotesEl.value;
-    saveState(state);
   });
 
   const rainDetailsEl = document.getElementById('rainDetails');
@@ -1803,7 +1778,6 @@
 
   function resetAll() {
     const { water, hold, skip, unlogged, raw } = collectResults();
-    const mgNotes = document.getElementById('monkeygrassNotes').value.trim();
     const totalLogged = water.length + hold.length + skip.length;
 
     // Rain has its own "Save This Rain Entry" button and its own history
@@ -1816,7 +1790,7 @@
         label: sessionLabel(),
         timestamp: Date.now(),
         water: water.map(w => w.text + (w.separate ? ' (separate track)' : '')),
-        hold, skip, unlogged, mgNotes,
+        hold, skip, unlogged,
         raw
       });
       saveHistory(history.slice(0, 90));
@@ -1828,7 +1802,6 @@
       r.textContent = '';
     });
     document.querySelectorAll('.card-summary').forEach(s => s.textContent = '');
-    document.getElementById('monkeygrassNotes').value = '';
     document.getElementById('resultsPanel').classList.remove('open');
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     updateEyebrow();
@@ -1947,11 +1920,6 @@
       html += '<div class="results-note">Not checked yet: ' + unlogged.join(', ') + '</div>';
     }
 
-    const mgNotes = document.getElementById('monkeygrassNotes').value.trim();
-    if (mgNotes) {
-      html += '<div class="results-note"><strong>Monkey grass notes:</strong> ' + mgNotes.replace(/</g, '&lt;') + '</div>';
-    }
-
     body.innerHTML = html;
     document.getElementById('resultsPanel').classList.add('open');
     document.getElementById('resultsPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1970,8 +1938,6 @@
     t += '\n\nSKIP, TOO WET (' + skip.length + ')\n';
     t += skip.length ? skip.map(s => '- ' + s).join('\n') : '- none';
     if (unlogged.length) t += '\n\nNot checked yet: ' + unlogged.join(', ');
-    const mgNotes = document.getElementById('monkeygrassNotes').value.trim();
-    if (mgNotes) t += '\n\nMonkey grass notes: ' + mgNotes;
     return t;
   }
 
@@ -2008,7 +1974,7 @@
   const PLANT_LABELS = {
     bluedaze: 'Blue Daze', pentas: 'Pentas', ixora: 'Ixora', blueberries: 'Blueberries',
     firebush2: 'Firebush (Garage Bed, new)', cordyline: 'Ti Plants (Cordyline)', coontie: 'Coontie',
-    monkeygrass: 'Monkey Grass', firebush: 'Firebush (N. Side of House)',
+    firebush: 'Firebush (N. Side of House)',
     firespike: 'Firespike Cutting', shrimpplant: 'Shrimp Plant',
     muhlygrass: 'Muhly Grass (Front Left Bed)', monkeygrass2: 'Monkey Grass (Garage Bed, new)'
   };
@@ -2017,7 +1983,7 @@
   const PLANT_DATES = {
     bluedaze: '2026-07-24', pentas: '2026-07-11', ixora: '2026-07-24', blueberries: '2026-07-10',
     firebush2: '2026-07-25', cordyline: '2026-07-25', coontie: '2026-07-11',
-    monkeygrass: '2026-07-12', firebush: '2026-07-10',
+    firebush: '2026-07-10',
     firespike: '2026-07-11', shrimpplant: '2026-07-15',
     muhlygrass: '2026-07-26', monkeygrass2: '2026-07-26'
   };
@@ -2131,7 +2097,7 @@
 
   // Verb differs for a couple of plants (monkey grass was relocated, not
   // freshly planted). Defaults to 'Planted' if not listed here.
-  const PLANT_VERB = { monkeygrass: 'Relocated', cordyline: 'Moved', monkeygrass2: 'Relocated' };
+  const PLANT_VERB = { cordyline: 'Moved', monkeygrass2: 'Relocated' };
 
   // Any extra context that used to be hardcoded alongside the date/day count.
   const PLANT_META_EXTRA = {
