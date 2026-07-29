@@ -1148,22 +1148,22 @@
     <div class="instance-list" data-labels="#1,#2,#3"></div>
     <div class="card-summary"></div>
   </div>
-  <div class="plant-card" data-plant="cordyline">
+  <div class="plant-card" data-plant="salvia">
     <div class="plant-head">
-      <div class="plant-name">Ti Plants (Cordyline)</div>
-      <div class="plant-meta">Moved Fri &middot; day 0</div>
+      <div class="plant-name">Salvia coccinea <span class="canary">Front Left Bed, middle row</span></div>
+      <div class="plant-meta">Planted 7/29 &middot; day 0</div>
     </div>
-    <div class="probe-note">Transplanted, not freshly purchased &mdash; cordylines have shallow fibrous roots and transplant easily, so risk is lower than a typical new planting. Still on a 4&ndash;6 week transplant-stress watch. Probe at root ball edge, 2&ndash;3" deep.</div>
-    <div class="instance-list" data-labels="#1,#2,#3,#4,#5"></div>
+    <div class="probe-note">Native. 6 total (5 fresh from Hollie's + 1 relocated volunteer that fills the middle row's 6th spot). Bare-soil halo, not mulched, to support self-seeding &mdash; probe right at the root ball edge, 2&ndash;3" deep, not out in the bare soil ring. Two-zone check is enough &mdash; sago end and cabbage palm end.</div>
+    <div class="instance-list" data-labels="Zone 1 (sago end),Zone 2 (cabbage palm end)"></div>
     <div class="card-summary"></div>
   </div>
-  <div class="plant-card" data-plant="monkeygrass2">
+  <div class="plant-card" data-plant="stumppot">
     <div class="plant-head">
-      <div class="plant-name">Monkey Grass <span class="canary">Garage Bed, new</span></div>
-      <div class="plant-meta">Relocated Sun &middot; day 0</div>
+      <div class="plant-name">Society Garlic + Frogfruit <span class="canary">Stump pot, potted</span></div>
+      <div class="plant-meta">Planted 7/29 &middot; day 0</div>
     </div>
-    <div class="probe-note">Single clump transplanted from Front Left Bed (behind the sago) into the crepe myrtle area of the Garage Bed. Transplant-stress watch: probe at root ball edge, 2&ndash;3" deep.</div>
-    <div class="instance-list" data-labels="Crepe myrtle clump"></div>
+    <div class="probe-note">Potted accent on the palm stump: 3 Society Garlic (Tulbaghia violacea, non-native but non-invasive) + 2 Frogfruit (Phyla nodiflora, native) trailing over the rim. Same pot, same soil &mdash; one reading covers both. Pots dry out faster than in-ground beds, so don't assume the same schedule as the rest of the bed. Probe 2&ndash;3" deep, mid-pot.</div>
+    <div class="instance-list" data-labels="Pot"></div>
     <div class="card-summary"></div>
   </div>
   <div class="plant-card" data-plant="coontie">
@@ -1320,7 +1320,13 @@
                    blue: "action-skip", blueText: "Skip. Let it dry before next check." },
     monkeygrass2:{ red: "action-water", redText: "Water now, soak at root ball edge (2-3\") \u2014 fresh transplant, treat like a new planting.",
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
-                   blue: "action-skip", blueText: "Skip. Let it dry before next check." }
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check." },
+    salvia:      { red: "action-water", redText: "Water now, soak at root ball edge (2-3\").",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check." },
+    stumppot:    { red: "action-water", redText: "Water now \u2014 pots dry faster than the bed, don't wait for the bed's schedule.",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 avoid soggy pot soil." }
   };
 
   const ZONE_LABELS_STD = ['RED', 'GREEN', 'BLUE'];
@@ -2001,7 +2007,8 @@
     firebush: 'Firebush (N. Side of House)',
     firespike: 'Firespike Cutting', shrimpplant: 'Shrimp Plant',
     muhlygrass: 'Muhly Grass (Front Left Bed)', monkeygrass2: 'Monkey Grass (Garage Bed, new)',
-    milkweed: 'Milkweed (Front Left Bed)', liatris: 'Liatris (Front Left Bed)'
+    milkweed: 'Milkweed (Front Left Bed)', liatris: 'Liatris (Front Left Bed)',
+    salvia: 'Salvia coccinea (Front Left Bed)', stumppot: 'Society Garlic + Frogfruit (Stump Pot)'
   };
 
   // Planting dates used to auto-compute taper stage (edit here if dates change)
@@ -2011,7 +2018,8 @@
     firebush: '2026-07-10',
     firespike: '2026-07-11', shrimpplant: '2026-07-15',
     muhlygrass: '2026-07-26', monkeygrass2: '2026-07-26',
-    milkweed: '2026-07-28', liatris: '2026-07-28'
+    milkweed: '2026-07-28', liatris: '2026-07-28',
+    salvia: '2026-07-29', stumppot: '2026-07-29'
   };
 
   function daysSince(dateStr) {
@@ -2133,7 +2141,9 @@
     firespike: 'no root system yet',
     shrimpplant: 'pool cage rock border, part shade after ~1-2pm',
     muhlygrass: '5 clumps, back row',
-    monkeygrass2: 'from Front Left Bed (behind sago), fills gap near crepe myrtle'
+    monkeygrass2: 'from Front Left Bed (behind sago), fills gap near crepe myrtle',
+    salvia: 'middle row, 6 total (5 fresh + 1 relocated volunteer), bare-soil halo',
+    stumppot: '3 Society Garlic + 2 Frogfruit, same pot'
   };
 
   function formatPlantMeta(plant) {
