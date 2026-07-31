@@ -181,10 +181,10 @@
 
   .instance-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 10px 16px 6px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px 16px 10px 16px;
   }
 
   .instance-label {
@@ -192,10 +192,9 @@
     font-size: 12.5px;
     font-weight: 700;
     color: var(--soil);
-    flex: 0 0 60px;
   }
 
-  .mini-btns { display: flex; gap: 5px; flex: 1; }
+  .mini-btns { display: flex; gap: 5px; width: 100%; }
 
   .mini-btn {
     flex: 1;
@@ -221,7 +220,7 @@
     font-family: 'Helvetica Neue', Arial, sans-serif;
     font-size: 11.5px;
     line-height: 1.4;
-    padding: 0 16px 10px 76px;
+    padding: 0 16px 10px 16px;
     display: none;
   }
 
@@ -230,7 +229,7 @@
   .instance-result.action-hold { color: var(--leaf); }
   .instance-result.action-skip { color: var(--wet); }
 
-  .instance-row:last-of-type { padding-bottom: 12px; }
+  .instance-row:last-of-type { padding-bottom: 14px; }
 
   .rain-card {
     margin: 16px 16px 4px 16px;
