@@ -1229,6 +1229,24 @@
     <div class="instance-list" data-labels="#1,#2"></div>
     <div class="card-summary"></div>
   </div>
+  <div class="plant-card" data-plant="blanketflower">
+    <div class="plant-head">
+      <div class="plant-name">Blanketflower <span class="canary">Front Left Bed, front row</span></div>
+      <div class="plant-meta">Planted 7/31 &middot; day 0 &middot; 9 total</div>
+    </div>
+    <div class="probe-note">9 plants across the front row, redistributed 7/31 to cover the front-center tip near the birdbath &mdash; too many to check individually, so grouped into 3 zones instead. Bare-soil halo (not mulched) to support self-seeding &mdash; probe right at the root ball edge, 2&ndash;3" deep, not out in the bare soil ring.</div>
+    <div class="instance-list" data-labels="Left zone (toward solar lights/monkey grass),Center zone (birdbath/hook area),Right zone (toward palm)"></div>
+    <div class="card-summary"></div>
+  </div>
+  <div class="plant-card" data-plant="coreopsis">
+    <div class="plant-head">
+      <div class="plant-name">Coreopsis 'UpTick Red' <span class="canary">Front Left Bed, front row</span></div>
+      <div class="plant-meta">Planted 7/31 &middot; day 0 &middot; 7 total, all Red</div>
+    </div>
+    <div class="probe-note">Non-native cultivar (Coreopsis hybrida), replaces Coreopsis leavenworthii. 7 plants interspersed with Blanketflower along the same front row &mdash; grouped into 3 zones, same zone boundaries as Blanketflower since they share the row. Probe at root ball edge, 2&ndash;3" deep. Wants a bit more moisture than true drought-tolerant natives &mdash; don't assume it can skip a check just because neighboring natives can.</div>
+    <div class="instance-list" data-labels="Left zone (toward solar lights/monkey grass),Center zone (birdbath/hook area),Right zone (toward palm)"></div>
+    <div class="card-summary"></div>
+  </div>
 
 
 
@@ -1326,7 +1344,13 @@
                    blue: "action-skip", blueText: "Skip. Let it dry before next check." },
     stumppot:    { red: "action-water", redText: "Water now \u2014 pots dry faster than the bed, don't wait for the bed's schedule.",
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
-                   blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 avoid soggy pot soil." }
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 avoid soggy pot soil." },
+    blanketflower:{ red: "action-water", redText: "Water now, soak at root ball edge (2-3\").",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check." },
+    coreopsis:   { red: "action-water", redText: "Water now, soak at root ball edge (2-3\") \u2014 this cultivar wants more moisture than the true natives nearby.",
+                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check." }
   };
 
   const ZONE_LABELS_STD = ['RED', 'GREEN', 'BLUE'];
@@ -2008,7 +2032,8 @@
     firespike: 'Firespike Cutting', shrimpplant: 'Shrimp Plant',
     muhlygrass: 'Muhly Grass (Front Left Bed)', monkeygrass2: 'Monkey Grass (Garage Bed, new)',
     milkweed: 'Milkweed (Front Left Bed)', liatris: 'Liatris (Front Left Bed)',
-    salvia: 'Salvia coccinea (Front Left Bed)', stumppot: 'Society Garlic + Frogfruit (Stump Pot)'
+    salvia: 'Salvia coccinea (Front Left Bed)', stumppot: 'Society Garlic + Frogfruit (Stump Pot)',
+    blanketflower: 'Blanketflower (Front Left Bed)', coreopsis: "Coreopsis 'UpTick Red' (Front Left Bed)"
   };
 
   // Planting dates used to auto-compute taper stage (edit here if dates change)
@@ -2019,7 +2044,8 @@
     firespike: '2026-07-11', shrimpplant: '2026-07-15',
     muhlygrass: '2026-07-26', monkeygrass2: '2026-07-26',
     milkweed: '2026-07-28', liatris: '2026-07-28',
-    salvia: '2026-07-29', stumppot: '2026-07-29'
+    salvia: '2026-07-29', stumppot: '2026-07-29',
+    blanketflower: '2026-07-31', coreopsis: '2026-07-31'
   };
 
   function daysSince(dateStr) {
@@ -2143,7 +2169,9 @@
     muhlygrass: '5 clumps, back row',
     monkeygrass2: 'from Front Left Bed (behind sago), fills gap near crepe myrtle',
     salvia: 'middle row, 6 total (5 fresh + 1 relocated volunteer), bare-soil halo',
-    stumppot: '3 Society Garlic + 2 Frogfruit, same pot'
+    stumppot: '3 Society Garlic + 2 Frogfruit, same pot',
+    blanketflower: '9 total, grouped into 3 zones, bare-soil halo',
+    coreopsis: '7 total all Red, grouped into 3 zones matching Blanketflower'
   };
 
   function formatPlantMeta(plant) {
