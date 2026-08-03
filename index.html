@@ -371,6 +371,100 @@
 
   .rain-today-log:empty { margin: 0; }
 
+  .quick-log-card {
+    margin: 4px 16px 16px 16px;
+    background: var(--sand-light);
+    border: 1px dashed var(--leaf-light);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .quick-log-title {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--leaf);
+    margin-bottom: 3px;
+  }
+
+  .quick-log-subtitle {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+    margin-bottom: 10px;
+  }
+
+  .quick-log-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .quick-log-date {
+    flex: 1;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    padding: 8px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--sand);
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .quick-log-btn {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--wet);
+    color: white;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .quick-log-confirm {
+    display: none;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px;
+    color: var(--leaf);
+    margin-top: 8px;
+  }
+
+  .quick-log-confirm.show { display: block; }
+  .quick-log-confirm.error { color: var(--danger); }
+
+  .quick-log-list {
+    margin-top: 10px;
+  }
+
+  .quick-log-entry {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    padding: 4px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--sand);
+  }
+
+  .quick-log-entry:first-child { border-top: none; }
+
+  .quick-log-remove {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--danger);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+
   .rain-today-title {
     font-size: 10.5px;
     font-weight: 700;
@@ -1091,6 +1185,17 @@
   </div>
   <div class="rain-save-confirm" id="rainSaveConfirm"></div>
   <div class="rain-today-log" id="rainTodayLog"></div>
+
+  <div class="quick-log-card">
+    <div class="quick-log-title">Quick Log &mdash; No Weather Check</div>
+    <div class="quick-log-subtitle">Use this when you know it rained (today or a past day) &mdash; skips the weather API entirely, since local storms often don't show up in it. No time/duration needed.</div>
+    <div class="quick-log-row">
+      <input type="date" class="quick-log-date" id="quickLogDate">
+      <button class="quick-log-btn" onclick="quickLogRain()">It Rained</button>
+    </div>
+    <div class="quick-log-confirm" id="quickLogConfirm"></div>
+    <div class="quick-log-list" id="quickLogList"></div>
+  </div>
 </div>
 
 <div class="rain-context-banner" id="rainContextBanner"></div>
@@ -1739,6 +1844,87 @@
     el.innerHTML = html;
   }
 
+  // Quick Log — bypasses the weather API entirely. Local FL convective storms
+  // often don't register in the gridded forecast, so this is a direct,
+  // no-details write straight into the permanent rain history. Also supports
+  // backdating, since the rest of the app only ever writes to today's date.
+  function quickLogRain() {
+    const dateInput = document.getElementById('quickLogDate');
+    const confirmEl = document.getElementById('quickLogConfirm');
+    const dateStr = dateInput && dateInput.value ? dateInput.value : todayDateKey();
+
+    // Anchor to local noon on the chosen date so sorting/day-math behaves
+    // regardless of timezone offset, and so "today" entries land after any
+    // earlier same-day detailed entries.
+    const isToday = dateStr === todayDateKey();
+    const timestamp = isToday ? Date.now() : new Date(dateStr + 'T12:00:00').getTime();
+
+    const entry = {
+      timestamp: timestamp,
+      dateKey: dateStr,
+      occurred: true,
+      events: [{ time: '', duration: '', intensity: '' }],
+      quickLogged: true
+    };
+
+    const history = loadRainHistory();
+    history.unshift(entry);
+    history.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    saveRainHistoryLog(history.slice(0, 300));
+
+    // If logging today, also sync the day's draft so the toggle/banner
+    // reflect it immediately without needing a weather refresh.
+    if (isToday) {
+      const rain = getRainState();
+      rain.occurred = true;
+      if (rain.events.length === 0) rain.events.push({ time: '', duration: '', intensity: '' });
+      rain.userEdited = true;
+      rain.autoFilled = false;
+      saveRainState(rain);
+      rainNoBtn.classList.remove('active');
+      rainYesBtn.classList.add('active');
+      rainDetailsEl.classList.add('open');
+      renderRainEvents(rain.events);
+      clearWeatherStatus();
+    }
+    updateRainContextBanner();
+    renderTodayRainLog();
+    renderQuickLogList();
+
+    if (confirmEl) {
+      confirmEl.classList.remove('error');
+      const label = isToday ? 'today' : new Date(dateStr + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      confirmEl.textContent = 'Logged rain for ' + label + '.';
+      confirmEl.classList.add('show');
+      setTimeout(() => confirmEl.classList.remove('show'), 4000);
+    }
+  }
+
+  function removeQuickLogEntry(timestamp) {
+    const history = loadRainHistory().filter(e => e.timestamp !== timestamp);
+    saveRainHistoryLog(history);
+    updateRainContextBanner();
+    renderTodayRainLog();
+    renderQuickLogList();
+  }
+
+  function renderQuickLogList() {
+    const el = document.getElementById('quickLogList');
+    if (!el) return;
+    const recent = loadRainHistory().filter(e => e.quickLogged).slice(0, 5);
+    if (recent.length === 0) { el.innerHTML = ''; return; }
+    let html = '';
+    recent.forEach(e => {
+      const label = new Date(e.timestamp).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      html += '<div class="quick-log-entry"><span>' + label + ' \u2014 rain logged</span>' +
+        '<button class="quick-log-remove" data-ts="' + e.timestamp + '">Undo</button></div>';
+    });
+    el.innerHTML = html;
+    el.querySelectorAll('.quick-log-remove').forEach(btn => {
+      btn.addEventListener('click', () => removeQuickLogEntry(Number(btn.dataset.ts)));
+    });
+  }
+
   (function restoreRain() {
     const rain = getRainState();
     rainNoBtn.classList.toggle('active', !rain.occurred);
@@ -1749,6 +1935,13 @@
     renderTodayRainLog();
     // Auto-fill from weather on load, unless rain was already manually logged/edited today
     fetchWeatherRain(false);
+
+    const quickLogDateEl = document.getElementById('quickLogDate');
+    if (quickLogDateEl) {
+      quickLogDateEl.value = todayDateKey();
+      quickLogDateEl.max = todayDateKey();
+    }
+    renderQuickLogList();
   })();
 
   function rainSummaryLine() {
