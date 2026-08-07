@@ -2537,8 +2537,15 @@
         attentionLines.push('<div class="risk-alert warn">' + PLANT_LABELS[plant] + ' has read dry in ' + pDry + '% of checks (' + s.dry + '/' + total + ') \u2014 worth a closer look at pocket size or mulch depth.</div>');
       }
     });
-    streaks.forEach(st => {
-      attentionLines.push('<div class="risk-alert warn">' + st.label + ' \u2014 ' + st.count + ' checks dry in a row.</div>');
+    // Only surface streaks of 4+ here \u2014 the streak counter is just
+    // consecutive RED/dry readings at check time, not a record of whether
+    // watering happened in between. 2-3 dry reads in a row is normal for
+    // fast-draining spots (e.g. Ixora reads dry almost daily even when
+    // watered daily), so a short streak isn't actionable on its own. A
+    // streak that keeps growing despite watering each time is the real
+    // signal, which is what the higher bar is trying to catch.
+    streaks.filter(st => st.count >= 4).forEach(st => {
+      attentionLines.push('<div class="risk-alert warn">' + st.label + ' has read dry at ' + st.count + ' checks in a row \u2014 if you\u2019ve been watering each time, this spot likely drains faster than the rest of the bed and may need more frequent watering, more mulch, or a pocket-size check.</div>');
     });
     if (impact.rainTotal > 0 && impact.noRainTotal > 0) {
       const pRain = Math.round((impact.rainDry / impact.rainTotal) * 100);
@@ -2549,7 +2556,7 @@
       }
     }
     if (attentionLines.length === 0) {
-      html += '<div class="attention-empty">Nothing needs attention right now \u2014 no high-risk dry readings, no active dry streaks, no rain-pattern anomalies.</div>';
+      html += '<div class="attention-empty">Nothing needs attention right now \u2014 no high-risk dry readings, no dry streaks of 4+ checks, no rain-pattern anomalies.</div>';
     } else {
       html += attentionLines.join('');
     }
@@ -2560,12 +2567,18 @@
     // only gets listed once instead of twice. Collapsed by default. ---
     html += '<details class="metrics-details"><summary>Per-Plant Status (' + Object.keys(PLANT_DATES).length + ' plants)</summary>';
     html += '<div class="card"><div class="card-inner">';
+    const maxStreakByPlant = {};
+    streaks.forEach(st => {
+      if (!maxStreakByPlant[st.plant] || st.count > maxStreakByPlant[st.plant]) maxStreakByPlant[st.plant] = st.count;
+    });
     Object.keys(PLANT_DATES).forEach(plant => {
       const s = plantStats[plant];
       const total = s ? s.dry + s.moist + s.wet : 0;
       const days = daysSince(PLANT_DATES[plant]);
       const stage = taperStage(plant, days);
       const dayLabel = stage.hideDayCount ? '' : (stage.dayLabel || ('day ' + days));
+      const streakCount = maxStreakByPlant[plant];
+      const streakNote = streakCount ? ' &middot; ' + streakCount + ' dry checks in a row' : '';
       html += '<div class="plant-row">';
       html += '<div class="plant-row-head"><span class="plant-row-name">' + (PLANT_LABELS[plant] || plant) + '</span>';
       html += '<span class="taper-stage ' + stage.cls + '">' + stage.label + '</span></div>';
@@ -2578,7 +2591,7 @@
         if (pMoist) html += '<div class="bar-seg moist" style="width:' + pMoist + '%"></div>';
         if (pWet) html += '<div class="bar-seg wet" style="width:' + pWet + '%"></div>';
         html += '</div>';
-        html += '<div class="plant-row-taper">' + total + ' reads &middot; ' + pDry + '% dry' + (dayLabel ? ' &middot; ' + dayLabel : '') + '</div>';
+        html += '<div class="plant-row-taper">' + total + ' reads &middot; ' + pDry + '% dry' + (dayLabel ? ' &middot; ' + dayLabel : '') + streakNote + '</div>';
       } else {
         html += '<div class="plant-row-taper">No structured reads logged yet' + (dayLabel ? ' &middot; ' + dayLabel : '') + '</div>';
       }
@@ -2725,7 +2738,7 @@
       }
       if (count >= 2) {
         const last = reads[reads.length - 1];
-        streaks.push({ label: (PLANT_LABELS[last.plant] || last.plant) + ' ' + last.label, count });
+        streaks.push({ label: (PLANT_LABELS[last.plant] || last.plant) + ' ' + last.label, count, plant: last.plant });
       }
     });
     return streaks.sort((a, b) => b.count - a.count);
