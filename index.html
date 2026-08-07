@@ -302,67 +302,23 @@
 
   .rain-context-banner.show { display: block; }
 
-  .rain-toggle {
-    display: flex;
-    gap: 8px;
+  .rain-status-line {
     padding: 12px 16px 0 16px;
-  }
-
-  .rain-btn {
-    flex: 1;
     font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12.5px;
-    font-weight: 700;
-    padding: 9px 4px;
-    border-radius: 8px;
-    border: 2px solid var(--sand);
-    cursor: pointer;
-    background: var(--sand-light);
+    font-size: 13px;
+    font-weight: 600;
     color: var(--ink-soft);
   }
 
-  .rain-btn.no-rain.active { background: var(--leaf-light); border-color: var(--leaf); color: white; }
-  .rain-btn.yes-rain.active { background: var(--wet); border-color: var(--wet); color: white; }
+  .rain-status-line.rained { color: var(--wet); }
 
   .rain-details {
     display: none;
-    padding: 12px 16px 14px 16px;
+    padding: 8px 16px 14px 16px;
     font-family: 'Helvetica Neue', Arial, sans-serif;
   }
 
   .rain-details.open { display: block; }
-
-  .rain-save-row {
-    padding: 4px 16px 14px 16px;
-  }
-
-  .rain-save-btn {
-    display: block;
-    width: 100%;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: white;
-    background: var(--wet);
-    border: none;
-    border-radius: 8px;
-    padding: 11px;
-    cursor: pointer;
-  }
-
-  .rain-save-confirm {
-    display: none;
-    margin: 0 16px 10px 16px;
-    background: #d8e6ef;
-    color: #2e5a72;
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    line-height: 1.4;
-  }
-
-  .rain-save-confirm.show { display: block; }
 
   .rain-today-log {
     margin: 0 16px 16px 16px;
@@ -465,15 +421,6 @@
     padding: 2px 4px;
   }
 
-  .rain-today-title {
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-bottom: 6px;
-  }
-
   .rain-today-entry {
     font-size: 12px;
     color: var(--ink);
@@ -483,33 +430,11 @@
 
   .rain-today-entry:first-child { border-top: none; }
 
-  .rain-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  .rain-row:last-child { margin-bottom: 0; }
-
-  .rain-row label {
-    flex: 0 0 70px;
-    font-size: 12px;
-    color: var(--ink-soft);
-  }
-
-  .rain-row input[type="text"] {
-    flex: 1;
-    border: 1px solid var(--sand);
-    border-radius: 6px;
-    padding: 7px 10px;
+  .rain-row-readonly {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
     font-size: 12.5px;
     color: var(--ink);
-    background: var(--sand-light);
-    font-family: 'Helvetica Neue', Arial, sans-serif;
   }
-
-  .rain-row input[type="text"]:focus { outline: none; border-color: var(--wet); }
 
   .rain-event {
     padding: 12px 0;
@@ -534,37 +459,6 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
-
-  .remove-event-btn {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--danger);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 2px 6px;
-  }
-
-  .add-event-btn {
-    display: block;
-    width: 100%;
-    margin-top: 4px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--wet);
-    background: var(--sand-light);
-    border: 1px dashed var(--wet);
-    border-radius: 8px;
-    padding: 8px;
-    cursor: pointer;
-  }
-
-  .rain-intensity { display: flex; gap: 6px; flex: 1; }
-
-  .rain-intensity .mini-btn { border-color: var(--sand); }
-  .rain-intensity .mini-btn.active { background: var(--wet); border-color: var(--wet); color: white; }
 
   .card-summary {
     font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -1158,10 +1052,8 @@
   <div class="t">How to Probe</div>
   <ol>
     <li>Insert 3&ndash;4" deep at the <strong>edge of the root ball</strong> &mdash; not dead center, not touching the stem.</li>
-    <li>For this weekend's transplants, that edge is where the original nursery soil meets the surrounding sand &mdash; that's the true test of whether water is reaching roots.</li>
-    <li>Center-of-root-ball readings run falsely wet right after planting (still-saturated nursery mix) &mdash; don't probe there.</li>
-    <li><strong>Blueberries:</strong> probe only inside each plant's amended acid pocket, never the surrounding native sand.</li>
-    <li><strong>Firespike cutting:</strong> skip the soil probe entirely &mdash; check the rooting medium surface by feel/sight, no roots yet to read.</li>
+    <li><strong>Blueberries are the one exception to rule 1:</strong> don't probe at the root-ball edge &mdash; the amended pocket is uniform soil throughout, so anywhere inside it works. Probe mid-pocket; just stay clear of the outer edge where it meets native sand.</li>
+    <li><strong>Small 2" plugs/seedlings</strong> (e.g. the Liatris seedlings): probe shallower &mdash; 1&ndash;2", not 3&ndash;4" &mdash; the whole root ball is only about 2" deep.</li>
     <li><strong>Reading sits right on the 3/4 border?</strong> Pull the probe, move it an inch or two over (still at the root ball edge), and recheck. Still borderline? Default to GREEN/hold &mdash; safer to wait than to risk overwatering, especially for blueberries and coontie.</li>
   </ol>
 </div>
@@ -1172,18 +1064,10 @@
     <button class="weather-btn" id="weatherBtn" onclick="fetchWeatherRain(true)">Refresh Weather</button>
   </div>
   <div class="weather-status" id="weatherStatus"></div>
-  <div class="rain-toggle">
-    <button class="rain-btn no-rain active" id="rainNoBtn" onclick="setRainOccurred(false, true)">No Rain</button>
-    <button class="rain-btn yes-rain" id="rainYesBtn" onclick="setRainOccurred(true, true)">Rained</button>
-  </div>
+  <div class="rain-status-line" id="rainStatusLine">No rain logged yet today</div>
   <div class="rain-details" id="rainDetails">
     <div id="rainEventsContainer"></div>
-    <button class="add-event-btn" id="addRainEventBtn" onclick="addRainEvent()">+ Add another rain event</button>
   </div>
-  <div class="rain-save-row">
-    <button class="rain-save-btn" id="saveRainBtn" onclick="saveRainEntry()">Save This Rain Entry</button>
-  </div>
-  <div class="rain-save-confirm" id="rainSaveConfirm"></div>
   <div class="rain-today-log" id="rainTodayLog"></div>
 
   <div class="quick-log-card">
@@ -1239,7 +1123,7 @@
       <div class="plant-name">Blueberries <span class="risk-tag risk-high">High risk</span></div>
       <div class="plant-meta">Planted Fri &middot; day 3 &middot; amended acid pocket only</div>
     </div>
-    <div class="probe-note">Probe inside each plant's own amended pocket only &mdash; never the surrounding sand.</div>
+    <div class="probe-note">Exception to the usual root-ball-edge rule: the amended pocket is uniform soil throughout, so probe mid-pocket rather than at an edge &mdash; just stay clear of where the pocket meets the surrounding native sand. <strong>Changed 8/7</strong> &mdash; all readings before this date were taken at the root-ball edge, not mid-pocket.</div>
     <div class="instance-list" data-labels="#1,#2"></div>
     <div class="card-summary"></div>
   </div>
@@ -1300,10 +1184,10 @@
   <div class="plant-card" data-plant="liatris">
     <div class="plant-head">
       <div class="plant-name">Liatris tenuifolia <span class="canary">Front Left Bed, back row</span></div>
-      <div class="plant-meta">Planted Tue 7/28 &middot; day 1 &middot; 6 of 9 in</div>
+      <div class="plant-meta">Planted 7/28 + 8/6 &middot; 12 of 12 in</div>
     </div>
-    <div class="probe-note">Native. 6 of 9 planted so far, in two clusters of 3, both in front of the Muhly Grass on the cabbage palm end (not the sago end) &mdash; 3 more still to buy/plant. Same as Milkweed: one probe reading per cluster is enough. Probe at root ball edge, 2&ndash;3" deep.</div>
-    <div class="instance-list" data-labels="Cluster 1 (cabbage palm end),Cluster 2 (cabbage palm end)"></div>
+    <div class="probe-note">Native. 12 total: 6 x 1-gal (planted 7/28, cabbage palm end, two clusters of 3) + 6 x 2" seedlings (planted 8/6, left side of the stump). The seedlings are small plugs &mdash; closer monitoring than the established 1-gal plants, and probe shallower (1&ndash;2", not 2&ndash;3") since the whole root ball is only about 2" deep. One reading per cluster/zone is enough.</div>
+    <div class="instance-list" data-labels="Cluster 1 (cabbage palm end),Cluster 2 (cabbage palm end),Cluster 3 (left of stump, 2&quot; seedlings)"></div>
     <div class="card-summary"></div>
   </div>
   <div class="plant-card" data-plant="blanketflower">
@@ -1523,8 +1407,6 @@
   });
 
   const rainDetailsEl = document.getElementById('rainDetails');
-  const rainNoBtn = document.getElementById('rainNoBtn');
-  const rainYesBtn = document.getElementById('rainYesBtn');
   const rainEventsContainer = document.getElementById('rainEventsContainer');
 
   // Rain is a fact about the calendar day, not about any single moisture-check
@@ -1578,50 +1460,6 @@
   function clearWeatherStatus() {
     const el = document.getElementById('weatherStatus');
     if (el) { el.classList.remove('show', 'auto', 'error'); el.textContent = ''; }
-  }
-
-  function setRainOccurred(occurred, manual) {
-    rainNoBtn.classList.toggle('active', !occurred);
-    rainYesBtn.classList.toggle('active', occurred);
-    rainDetailsEl.classList.toggle('open', occurred);
-    const rain = getRainState();
-    rain.occurred = occurred;
-    if (occurred && rain.events.length === 0) {
-      rain.events.push({ time: '', duration: '', intensity: '' });
-    }
-    if (manual) { rain.userEdited = true; rain.autoFilled = false; clearWeatherStatus(); }
-    saveRainState(rain);
-    renderRainEvents(rain.events);
-    updateRainContextBanner();
-  }
-
-  function addRainEvent() {
-    const rain = getRainState();
-    rain.events.push({ time: '', duration: '', intensity: '' });
-    rain.userEdited = true; rain.autoFilled = false; clearWeatherStatus();
-    saveRainState(rain);
-    renderRainEvents(rain.events);
-    updateRainContextBanner();
-  }
-
-  function removeRainEvent(idx) {
-    const rain = getRainState();
-    rain.events.splice(idx, 1);
-    if (rain.events.length === 0) rain.events.push({ time: '', duration: '', intensity: '' });
-    rain.userEdited = true; rain.autoFilled = false; clearWeatherStatus();
-    saveRainState(rain);
-    renderRainEvents(rain.events);
-    updateRainContextBanner();
-  }
-
-  function updateRainEventField(idx, field, value) {
-    const rain = getRainState();
-    rain.events[idx][field] = value;
-    delete rain.events[idx]._startISO;
-    delete rain.events[idx]._endISO;
-    rain.userEdited = true; rain.autoFilled = false; clearWeatherStatus();
-    saveRainState(rain);
-    updateRainContextBanner();
   }
 
   // North Tampa / Lutz property — approximate coordinates.
@@ -1694,9 +1532,7 @@
         userEdited: false
       };
       saveRainState(rain);
-      rainNoBtn.classList.toggle('active', !rain.occurred);
-      rainYesBtn.classList.toggle('active', rain.occurred);
-      rainDetailsEl.classList.toggle('open', rain.occurred);
+      updateRainStatusLine();
       renderRainEvents(rain.events);
       updateRainContextBanner();
 
@@ -1704,52 +1540,50 @@
         statusEl.classList.remove('error');
         statusEl.classList.add('show', 'auto');
         statusEl.textContent = events.length
-          ? 'Auto-filled from weather data \u2014 ' + totalIn.toFixed(2) + '" so far today across ' + events.length + ' period' + (events.length > 1 ? 's' : '') + '. Check/edit below.'
-          : 'Weather check: no rain recorded today so far (' + totalIn.toFixed(2) + '"). Edit below if that seems wrong.';
+          ? 'Auto-filled from weather data \u2014 ' + totalIn.toFixed(2) + '" so far today across ' + events.length + ' period' + (events.length > 1 ? 's' : '') + '.'
+          : 'Weather check: no rain recorded today so far (' + totalIn.toFixed(2) + '"). If that seems wrong, use Quick Log below.';
       }
     } catch (err) {
       if (statusEl) {
         statusEl.classList.remove('auto');
         statusEl.classList.add('show', 'error');
-        statusEl.textContent = 'Could not reach weather service \u2014 log rain manually below.';
+        statusEl.textContent = 'Could not reach weather service \u2014 use Quick Log below instead.';
       }
     } finally {
       if (btn) { btn.disabled = false; btn.innerHTML = 'Refresh Weather'; }
     }
   }
 
+  // Read-only: only ever shows what Weather Refresh auto-detected. Manual
+  // entry (with or without details) goes through Quick Log instead, so
+  // there's nothing here to edit anymore.
   function renderRainEvents(events) {
     rainEventsContainer.innerHTML = '';
-    events.forEach((ev, idx) => {
+    const real = (events || []).filter(ev => ev.time || ev.duration || ev.intensity);
+    if (real.length === 0) { rainDetailsEl.classList.remove('open'); return; }
+    rainDetailsEl.classList.add('open');
+    real.forEach((ev, idx) => {
       const div = document.createElement('div');
       div.className = 'rain-event';
+      const parts = [ev.time, ev.duration, ev.intensity].filter(Boolean).join(' \u00b7 ');
       div.innerHTML =
-        '<div class="rain-event-head">' +
-          '<span class="rain-event-label">Event #' + (idx + 1) + '</span>' +
-          (events.length > 1 ? '<button class="remove-event-btn" data-idx="' + idx + '">Remove</button>' : '') +
-        '</div>' +
-        '<div class="rain-row"><label>Start time</label><input type="text" class="rain-time-input" placeholder="e.g. 2:15pm" value="' + (ev.time || '').replace(/"/g,'&quot;') + '"></div>' +
-        '<div class="rain-row"><label>Duration</label><input type="text" class="rain-duration-input" placeholder="e.g. 20 min" value="' + (ev.duration || '').replace(/"/g,'&quot;') + '"></div>' +
-        '<div class="rain-row"><label>Intensity</label><div class="rain-intensity">' +
-          '<button class="mini-btn' + (ev.intensity === 'Light' ? ' active' : '') + '" data-intensity="Light">Light</button>' +
-          '<button class="mini-btn' + (ev.intensity === 'Moderate' ? ' active' : '') + '" data-intensity="Moderate">Moderate</button>' +
-          '<button class="mini-btn' + (ev.intensity === 'Heavy' ? ' active' : '') + '" data-intensity="Heavy">Heavy</button>' +
-        '</div></div>';
+        '<div class="rain-event-head"><span class="rain-event-label">Detected period ' + (idx + 1) + '</span></div>' +
+        '<div class="rain-row-readonly">' + parts + '</div>';
       rainEventsContainer.appendChild(div);
-
-      div.querySelector('.rain-time-input').addEventListener('input', (e) => updateRainEventField(idx, 'time', e.target.value));
-      div.querySelector('.rain-duration-input').addEventListener('input', (e) => updateRainEventField(idx, 'duration', e.target.value));
-      div.querySelectorAll('.rain-intensity .mini-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          div.querySelectorAll('.rain-intensity .mini-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          updateRainEventField(idx, 'intensity', btn.dataset.intensity);
-        });
-        // note: updateRainEventField already marks the entry as user-edited
-      });
-      const removeBtn = div.querySelector('.remove-event-btn');
-      if (removeBtn) removeBtn.addEventListener('click', () => removeRainEvent(idx));
     });
+  }
+
+  function updateRainStatusLine() {
+    const el = document.getElementById('rainStatusLine');
+    if (!el) return;
+    const rain = getRainState();
+    if (rain.occurred) {
+      el.textContent = rain.autoFilled ? 'Rained today \u2014 detected by weather check' : 'Rained today \u2014 logged manually';
+      el.classList.add('rained');
+    } else {
+      el.textContent = 'No rain logged yet today';
+      el.classList.remove('rained');
+    }
   }
 
   function updateRainContextBanner() {
@@ -1788,60 +1622,17 @@
     banner.textContent = msg;
   }
 
-  function saveRainEntry() {
-    const rain = getRainState();
-    const entry = {
-      timestamp: Date.now(),
-      dateKey: todayDateKey(),
-      occurred: !!rain.occurred,
-      events: rain.occurred ? rain.events.filter(e => e.time || e.duration || e.intensity) : []
-    };
-    // If "Rained" was toggled on but no event details were filled in, still
-    // log it as a bare occurred:true entry rather than dropping it silently.
-    if (rain.occurred && entry.events.length === 0) entry.events = [{ time: '', duration: '', intensity: '' }];
-
-    const history = loadRainHistory();
-    history.unshift(entry);
-    saveRainHistoryLog(history.slice(0, 300));
-
-    // Clear the draft — this entry is now logged, so the form resets for
-    // the next rain check (could be later the same day).
-    const freshRain = { occurred: false, events: [{ time: '', duration: '', intensity: '' }], autoFilled: false, userEdited: false };
-    saveRainState(freshRain);
-    rainNoBtn.classList.add('active');
-    rainYesBtn.classList.remove('active');
-    rainDetailsEl.classList.remove('open');
-    renderRainEvents(freshRain.events);
-    updateRainContextBanner();
-    clearWeatherStatus();
-    renderTodayRainLog();
-
-    const confirmEl = document.getElementById('rainSaveConfirm');
-    if (confirmEl) {
-      const timeStr = new Date(entry.timestamp).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-      confirmEl.textContent = (entry.occurred ? 'Rain entry saved' : 'No-rain check saved') + ' \u2014 ' + timeStr + '. Form cleared \u2014 log again if it rains again today.';
-      confirmEl.classList.add('show');
-      setTimeout(() => confirmEl.classList.remove('show'), 4000);
-    }
-  }
-
+  // Fixed one-line summary — never grows no matter how many times rain gets
+  // logged today (quick-logged or weather-detected). Replaces the old
+  // itemized "Saved today (N)" list that kept stacking a new row per save.
   function renderTodayRainLog() {
     const el = document.getElementById('rainTodayLog');
     if (!el) return;
     const today = todayDateKey();
-    const entries = loadRainHistory().filter(e => e.dateKey === today);
-    if (entries.length === 0) { el.innerHTML = ''; return; }
-    let html = '<div class="rain-today-title">Saved today (' + entries.length + ')</div>';
-    entries.forEach(e => {
-      const timeStr = new Date(e.timestamp).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-      if (!e.occurred) {
-        html += '<div class="rain-today-entry">' + timeStr + ' \u2014 no rain</div>';
-      } else {
-        const parts = e.events.map(ev => [ev.time, ev.duration, ev.intensity].filter(Boolean).join(', ')).filter(Boolean).join(' / ');
-        html += '<div class="rain-today-entry">' + timeStr + ' \u2014 rained' + (parts ? ' (' + parts + ')' : '') + '</div>';
-      }
-    });
-    el.innerHTML = html;
+    const quickLogged = loadRainHistory().filter(e => e.dateKey === today && e.quickLogged).length;
+    if (quickLogged === 0) { el.innerHTML = ''; return; }
+    el.innerHTML = '<div class="rain-today-entry">Quick-logged today: ' + quickLogged +
+      (quickLogged === 1 ? ' entry' : ' entries') + '</div>';
   }
 
   // Quick Log — bypasses the weather API entirely. Local FL convective storms
@@ -1881,9 +1672,7 @@
       rain.userEdited = true;
       rain.autoFilled = false;
       saveRainState(rain);
-      rainNoBtn.classList.remove('active');
-      rainYesBtn.classList.add('active');
-      rainDetailsEl.classList.add('open');
+      updateRainStatusLine();
       renderRainEvents(rain.events);
       clearWeatherStatus();
     }
@@ -1911,7 +1700,13 @@
   function renderQuickLogList() {
     const el = document.getElementById('quickLogList');
     if (!el) return;
-    const recent = loadRainHistory().filter(e => e.quickLogged).slice(0, 5);
+    // Time-bound to the last 7 days (not just "most recent 5 by count") so
+    // an old entry actually disappears once it's stale, rather than sitting
+    // there until enough newer entries happen to bump it off.
+    const cutoff = Date.now() - 7 * 86400000;
+    const recent = loadRainHistory()
+      .filter(e => e.quickLogged && (e.timestamp || 0) >= cutoff)
+      .slice(0, 10);
     if (recent.length === 0) { el.innerHTML = ''; return; }
     let html = '';
     recent.forEach(e => {
@@ -1927,9 +1722,7 @@
 
   (function restoreRain() {
     const rain = getRainState();
-    rainNoBtn.classList.toggle('active', !rain.occurred);
-    rainYesBtn.classList.toggle('active', !!rain.occurred);
-    rainDetailsEl.classList.toggle('open', !!rain.occurred);
+    updateRainStatusLine();
     renderRainEvents(rain.events.length ? rain.events : [{ time: '', duration: '', intensity: '' }]);
     updateRainContextBanner();
     renderTodayRainLog();
@@ -2225,7 +2018,7 @@
     firebush: '2026-07-10',
     firespike: '2026-07-11', shrimpplant: '2026-07-15',
     muhlygrass: '2026-07-26', monkeygrass2: '2026-07-26',
-    milkweed: '2026-07-28', liatris: '2026-07-28',
+    milkweed: '2026-07-28', liatris: '2026-08-06',
     salvia: '2026-07-29', stumppot: '2026-07-29',
     blanketflower: '2026-07-31', coreopsis: '2026-07-31'
   };
