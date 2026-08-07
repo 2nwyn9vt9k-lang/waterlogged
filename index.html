@@ -881,6 +881,52 @@
   .stage-eod { background: #d8e6ef; color: var(--wet); }
   .stage-established { background: #dfe9df; color: var(--leaf); }
 
+  .metrics-details {
+    margin: 0 16px 12px 16px;
+  }
+
+  .metrics-details summary {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+    padding: 12px 4px;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .metrics-details summary::-webkit-details-marker { display: none; }
+
+  .metrics-details summary::after {
+    content: '\25BE';
+    font-size: 11px;
+    color: var(--ink-soft);
+    transition: transform 0.15s ease;
+  }
+
+  .metrics-details[open] summary::after { transform: rotate(180deg); }
+
+  .metrics-details .card { margin: 0 0 0 0; }
+
+  .attention-empty {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12.5px;
+    color: var(--leaf);
+    padding: 10px 12px;
+    background: #dfe9df;
+    border-radius: 6px;
+  }
+
+  .plant-row-taper {
+    margin-top: 6px;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+  }
+
   .care-item {
     padding: 12px 0;
     border-bottom: 1px solid var(--sand);
@@ -2470,36 +2516,88 @@
     html += overviewCard(rainDays, 'Rain Days');
     html += '</div>';
 
-    // --- Per-plant dryness rate ---
+    // --- Per-plant dryness stats (used by Needs Attention + Per-Plant Status) ---
     const plantStats = computePlantStats(sorted);
-    html += '<h2 class="section-title">Dryness Rate by Plant</h2>';
+    const impact = computeRainImpact(sorted, sortedRain);
+    const streaks = computeStreaks(sorted);
+    const rainStats = computeRainStats(sortedRain);
+
+    // --- Needs Attention: always visible, no expanding required. Pulls only
+    // the actionable signal out of High-Risk Watch, Dry Streaks, and Rain
+    // Impact \u2014 full detail on all three still lives in the sections below. ---
+    html += '<h2 class="section-title">Needs Attention</h2>';
     html += '<div class="card"><div class="card-inner">';
-    if (Object.keys(plantStats).length === 0) {
-      html += '<div class="risk-alert ok">Not enough structured reading data yet &mdash; keep logging and this fills in automatically.</div>';
+    const attentionLines = [];
+    ['blueberries', 'coontie'].forEach(plant => {
+      const s = plantStats[plant];
+      const total = s ? s.dry + s.moist + s.wet : 0;
+      if (total === 0) return;
+      const pDry = Math.round((s.dry / total) * 100);
+      if (pDry >= 40) {
+        attentionLines.push('<div class="risk-alert warn">' + PLANT_LABELS[plant] + ' has read dry in ' + pDry + '% of checks (' + s.dry + '/' + total + ') \u2014 worth a closer look at pocket size or mulch depth.</div>');
+      }
+    });
+    streaks.forEach(st => {
+      attentionLines.push('<div class="risk-alert warn">' + st.label + ' \u2014 ' + st.count + ' checks dry in a row.</div>');
+    });
+    if (impact.rainTotal > 0 && impact.noRainTotal > 0) {
+      const pRain = Math.round((impact.rainDry / impact.rainTotal) * 100);
+      const pNoRain = Math.round((impact.noRainDry / impact.noRainTotal) * 100);
+      const diff = pNoRain - pRain;
+      if (diff < -10) {
+        attentionLines.push('<div class="risk-alert warn">Beds are reading drier on rain days than non-rain days (' + diff + ' pts) \u2014 worth a look, could mean checks happen before rain reaches root depth, or sandy soil is draining faster than rain replenishes it.</div>');
+      }
+    }
+    if (attentionLines.length === 0) {
+      html += '<div class="attention-empty">Nothing needs attention right now \u2014 no high-risk dry readings, no active dry streaks, no rain-pattern anomalies.</div>';
     } else {
-      Object.keys(plantStats).forEach(plant => {
-        const s = plantStats[plant];
-        const total = s.dry + s.moist + s.wet;
-        if (total === 0) return;
+      html += attentionLines.join('');
+    }
+    html += '</div></div>';
+
+    // --- Per-Plant Status: merges the old separate Dryness Rate and Watering
+    // Taper Tracker sections into one row per plant, so the full plant roster
+    // only gets listed once instead of twice. Collapsed by default. ---
+    html += '<details class="metrics-details"><summary>Per-Plant Status (' + Object.keys(PLANT_DATES).length + ' plants)</summary>';
+    html += '<div class="card"><div class="card-inner">';
+    Object.keys(PLANT_DATES).forEach(plant => {
+      const s = plantStats[plant];
+      const total = s ? s.dry + s.moist + s.wet : 0;
+      const days = daysSince(PLANT_DATES[plant]);
+      const stage = taperStage(plant, days);
+      const dayLabel = stage.hideDayCount ? '' : (stage.dayLabel || ('day ' + days));
+      html += '<div class="plant-row">';
+      html += '<div class="plant-row-head"><span class="plant-row-name">' + (PLANT_LABELS[plant] || plant) + '</span>';
+      html += '<span class="taper-stage ' + stage.cls + '">' + stage.label + '</span></div>';
+      if (total > 0) {
         const pDry = Math.round((s.dry / total) * 100);
         const pMoist = Math.round((s.moist / total) * 100);
         const pWet = 100 - pDry - pMoist;
-        html += '<div class="plant-row">';
-        html += '<div class="plant-row-head"><span class="plant-row-name">' + (PLANT_LABELS[plant] || plant) + '</span>';
-        html += '<span class="plant-row-count">' + total + ' reads &middot; ' + pDry + '% dry</span></div>';
         html += '<div class="bar-track">';
         if (pDry) html += '<div class="bar-seg dry" style="width:' + pDry + '%"></div>';
         if (pMoist) html += '<div class="bar-seg moist" style="width:' + pMoist + '%"></div>';
         if (pWet) html += '<div class="bar-seg wet" style="width:' + pWet + '%"></div>';
-        html += '</div></div>';
-      });
-    }
-    html += '</div></div>';
-    html += '<div class="bar-legend"><span><i class="legend-dot dry"></i>Dry</span><span><i class="legend-dot moist"></i>Moist</span><span><i class="legend-dot wet"></i>Wet</span></div>';
+        html += '</div>';
+        html += '<div class="plant-row-taper">' + total + ' reads &middot; ' + pDry + '% dry' + (dayLabel ? ' &middot; ' + dayLabel : '') + '</div>';
+      } else {
+        html += '<div class="plant-row-taper">No structured reads logged yet' + (dayLabel ? ' &middot; ' + dayLabel : '') + '</div>';
+      }
+      if (plant === 'firespike') {
+        const rooting = loadFirespikeRootingState();
+        html += '<div style="padding:6px 0 0 0;">';
+        html += rooting.rooted
+          ? '<button class="care-btn secondary" onclick="unmarkFirespikeRooted()">Unmark rooted (started ' + new Date(rooting.rootedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ')</button>'
+          : '<button class="care-btn" onclick="markFirespikeRooted()">Mark as rooted \u2014 start taper clock</button>';
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    html += '<div class="bar-legend" style="margin:10px 0 0 0;"><span><i class="legend-dot dry"></i>Dry</span><span><i class="legend-dot moist"></i>Moist</span><span><i class="legend-dot wet"></i>Wet</span></div>';
+    html += '</div></div></details>';
 
-    // --- Rain impact on dryness ---
-    const impact = computeRainImpact(sorted, sortedRain);
-    html += '<h2 class="section-title">Rain Impact on Dryness</h2>';
+    // --- Rain Impact detail (full breakdown; the anomaly call-out already
+    // surfaced above in Needs Attention if it's notable) ---
+    html += '<details class="metrics-details"><summary>Rain Impact Detail</summary>';
     html += '<div class="card"><div class="card-inner">';
     if (impact.rainTotal === 0 || impact.noRainTotal === 0) {
       html += '<div class="risk-alert ok">Need logged reads on both rain days and non-rain days to compare &mdash; keep logging on days it doesn&rsquo;t rain too.</div>';
@@ -2529,73 +2627,18 @@
         html += '</div>';
       }
     }
-    html += '</div></div>';
-
-    // --- High-risk watch ---
-    html += '<h2 class="section-title">High-Risk Watch</h2>';
-    html += '<div class="card"><div class="card-inner">';
-    ['blueberries', 'coontie'].forEach(plant => {
-      const s = plantStats[plant];
-      const total = s ? s.dry + s.moist + s.wet : 0;
-      if (total === 0) {
-        html += '<div class="risk-alert ok">' + PLANT_LABELS[plant] + ': no structured reads logged yet.</div>';
-        return;
-      }
-      const pDry = Math.round((s.dry / total) * 100);
-      const cls = pDry >= 40 ? 'warn' : 'ok';
-      const msg = pDry >= 40
-        ? PLANT_LABELS[plant] + ' has read dry in ' + pDry + '% of checks (' + s.dry + '/' + total + ') \u2014 worth a closer look at pocket size or mulch depth.'
-        : PLANT_LABELS[plant] + ' reads dry only ' + pDry + '% of the time (' + s.dry + '/' + total + ') \u2014 tracking normally.';
-      html += '<div class="risk-alert ' + cls + '">' + msg + '</div>';
-    });
-    html += '</div></div>';
-
-    // --- Consecutive dry streaks ---
-    const streaks = computeStreaks(sorted);
-    html += '<h2 class="section-title">Current Dry Streaks (2+ in a row)</h2>';
-    html += '<div class="card"><div class="card-inner">';
-    if (streaks.length === 0) {
-      html += '<div class="risk-alert ok">Nothing currently on a dry streak.</div>';
-    } else {
-      streaks.forEach(st => {
-        html += '<div class="streak-item"><span>' + st.label + '</span><span class="streak-count">' + st.count + ' checks dry</span></div>';
-      });
-    }
-    html += '</div></div>';
+    html += '</div></div></details>';
 
     // --- Rain summary ---
-    const rainStats = computeRainStats(sortedRain);
-    html += '<h2 class="section-title">Rain Summary</h2>';
+    html += '<details class="metrics-details"><summary>Rain Summary</summary>';
     html += '<div class="card"><div class="card-inner">';
     html += rainStatRow('Total rain events', rainStats.totalEvents);
     html += rainStatRow('Light / Moderate / Heavy', rainStats.light + ' / ' + rainStats.moderate + ' / ' + rainStats.heavy);
     html += rainStatRow('Days since last rain', rainStats.daysSinceLastRain === null ? 'No rain logged yet' : rainStats.daysSinceLastRain);
-    html += '</div></div>';
-
-    // --- Taper tracker ---
-    html += '<h2 class="section-title">Watering Taper Tracker</h2>';
-    html += '<div class="card"><div class="card-inner">';
-    Object.keys(PLANT_DATES).forEach(plant => {
-      const days = daysSince(PLANT_DATES[plant]);
-      const stage = taperStage(plant, days);
-      const dayLabel = stage.hideDayCount ? '' : (stage.dayLabel || ('day ' + days));
-      html += '<div class="taper-row">';
-      html += '<div><div class="taper-name">' + (PLANT_LABELS[plant] || plant) + '</div>' + (dayLabel ? '<div class="taper-days">' + dayLabel + '</div>' : '') + '</div>';
-      html += '<span class="taper-stage ' + stage.cls + '">' + stage.label + '</span>';
-      html += '</div>';
-      if (plant === 'firespike') {
-        const rooting = loadFirespikeRootingState();
-        html += '<div style="padding:0 0 9px 0;">';
-        html += rooting.rooted
-          ? '<button class="care-btn secondary" onclick="unmarkFirespikeRooted()">Unmark rooted (started ' + new Date(rooting.rootedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ')</button>'
-          : '<button class="care-btn" onclick="markFirespikeRooted()">Mark as rooted \u2014 start taper clock</button>';
-        html += '</div>';
-      }
-    });
-    html += '</div></div>';
+    html += '</div></div></details>';
 
     // --- Export ---
-    html += '<h2 class="section-title">Export Data</h2>';
+    html += '<details class="metrics-details"><summary>Export Data</summary>';
     html += '<div class="card"><div class="card-inner">';
     html += '<div class="export-buttons">';
     html += '<button class="export-btn" id="exportMoistureBtn" onclick="exportMoistureCSV()">Export Moisture Readings (CSV)</button>';
@@ -2603,7 +2646,7 @@
     html += '<button class="export-btn tertiary" id="exportJsonBtn" onclick="exportFullBackupJSON()">Export Full Backup (JSON)</button>';
     html += '</div>';
     html += '<div class="export-note">CSV files open directly in Numbers, Excel, or Google Sheets for a closer look. The JSON backup keeps everything in one file \u2014 all readings, rain history, and today\u2019s in-progress check. All three are read-only exports; nothing saved on this device is changed, cleared, or removed.</div>';
-    html += '</div></div>';
+    html += '</div></div></details>';
 
     const footerBits = [];
     footerBits.push(sorted.length + ' saved plant session' + (sorted.length === 1 ? '' : 's') + (newest ? ', most recent: ' + newest.label : ''));
