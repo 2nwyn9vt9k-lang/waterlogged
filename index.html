@@ -1281,6 +1281,24 @@
     <div class="instance-list" data-labels="#1,#2"></div>
     <div class="card-summary"></div>
   </div>
+  <div class="plant-card" data-plant="firespikepots">
+    <div class="plant-head">
+      <div class="plant-name">Firespike Cuttings (potted) <span class="risk-tag risk-med">Medium risk</span></div>
+      <div class="plant-meta">Potted 8/9 &middot; day 0 &middot; patio storage shelf, hardening off</div>
+    </div>
+    <div class="probe-note">2 of the 6 jar-rooted cuttings, potted up 8/9 and labeled "FIRE SPIKE 8/9." Already rooted before potting (unlike the original in-ground firespike cutting) &mdash; check soil surface/first inch by feel, keep consistently moist (not soggy) through the first 1-2 weeks, then harden off gradually toward final sun exposure. Log each pot separately.</div>
+    <div class="instance-list" data-labels="#1,#2"></div>
+    <div class="card-summary"></div>
+  </div>
+  <div class="plant-card" data-plant="salviapot">
+    <div class="plant-head">
+      <div class="plant-name">Salvia Cutting (potted) <span class="risk-tag risk-med">Medium risk</span></div>
+      <div class="plant-meta">Potted 8/9 &middot; day 0 &middot; patio storage shelf, hardening off</div>
+    </div>
+    <div class="probe-note">1 of 3 well-rooted salvia coccinea cuttings, potted up 8/9 and labeled "SALVIA 8/9." Destination once established: fill thin spots in the Front Left Bed salvia middle row. Check soil surface/first inch by feel, keep consistently moist (not soggy), harden off gradually before eventual transplant.</div>
+    <div class="instance-list" data-labels="#1"></div>
+    <div class="card-summary"></div>
+  </div>
 
 </section>
 
@@ -1374,7 +1392,13 @@
                    blue: "action-skip", blueText: "Skip. Let it dry before next check." },
     coreopsis:   { red: "action-water", redText: "Water now, soak at root ball edge (2-3\") \u2014 this cultivar wants more moisture than the true natives nearby.",
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
-                   blue: "action-skip", blueText: "Skip. Let it dry before next check." }
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check." },
+    firespikepots:{ red: "action-water", redText: "Lightly water \u2014 pots dry faster than the bed, don't wait for the bed's schedule.",
+                   green: "action-hold", greenText: "Good \u2014 evenly moist is the target, leave it.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 avoid soggy pot soil during hardening off." },
+    salviapot:   { red: "action-water", redText: "Lightly water \u2014 pots dry faster than the bed, don't wait for the bed's schedule.",
+                   green: "action-hold", greenText: "Good \u2014 evenly moist is the target, leave it.",
+                   blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 avoid soggy pot soil during hardening off." }
   };
 
   const ZONE_LABELS_STD = ['RED', 'GREEN', 'BLUE'];
@@ -2054,7 +2078,8 @@
     muhlygrass: 'Muhly Grass (Front Left Bed)', monkeygrass2: 'Monkey Grass (Garage Bed, new)',
     milkweed: 'Milkweed (Front Left Bed)', liatris: 'Liatris (Front Left Bed)',
     salvia: 'Salvia coccinea (Front Left Bed)', stumppot: 'Society Garlic + Frogfruit (Stump Pot)',
-    blanketflower: 'Blanketflower (Front Left Bed)', coreopsis: "Coreopsis 'UpTick Red' (Front Left Bed)"
+    blanketflower: 'Blanketflower (Front Left Bed)', coreopsis: "Coreopsis 'UpTick Red' (Front Left Bed)",
+    firespikepots: 'Firespike Cuttings (Potted)', salviapot: 'Salvia Cutting (Potted)'
   };
 
   // Planting dates used to auto-compute taper stage (edit here if dates change)
@@ -2066,7 +2091,8 @@
     muhlygrass: '2026-07-26', monkeygrass2: '2026-07-26',
     milkweed: '2026-07-28', liatris: '2026-08-06',
     salvia: '2026-07-29', stumppot: '2026-07-29',
-    blanketflower: '2026-07-31', coreopsis: '2026-07-31'
+    blanketflower: '2026-07-31', coreopsis: '2026-07-31',
+    firespikepots: '2026-08-09', salviapot: '2026-08-09'
   };
 
   function daysSince(dateStr) {
@@ -2178,7 +2204,7 @@
 
   // Verb differs for a couple of plants (monkey grass was relocated, not
   // freshly planted). Defaults to 'Planted' if not listed here.
-  const PLANT_VERB = { cordyline: 'Moved', monkeygrass2: 'Relocated' };
+  const PLANT_VERB = { cordyline: 'Moved', monkeygrass2: 'Relocated', firespikepots: 'Potted', salviapot: 'Potted' };
 
   // Any extra context that used to be hardcoded alongside the date/day count.
   const PLANT_META_EXTRA = {
@@ -2192,7 +2218,9 @@
     salvia: 'middle row, 6 total (5 fresh + 1 relocated volunteer), bare-soil halo',
     stumppot: '3 Society Garlic + 2 Frogfruit, same pot',
     blanketflower: '9 total, grouped into 3 zones, bare-soil halo',
-    coreopsis: '7 total all Red, grouped into 3 zones matching Blanketflower'
+    coreopsis: '7 total all Red, grouped into 3 zones matching Blanketflower',
+    firespikepots: 'patio shelf, hardening off, already rooted before potting',
+    salviapot: 'patio shelf, hardening off, destination: Front Left Bed salvia row'
   };
 
   function formatPlantMeta(plant) {
