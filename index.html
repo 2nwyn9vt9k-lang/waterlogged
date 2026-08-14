@@ -1152,7 +1152,7 @@
 
   <div class="plant-card" data-plant="bluedaze">
     <div class="plant-head">
-      <div class="plant-name">Blue Daze <span class="canary">Bed canary</span></div>
+      <div class="plant-name">Blue Daze <span class="canary">Garage Bed</span> <span class="canary">Bed canary</span></div>
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
     <div class="probe-note">23 total now (5 original + 18 new 7/24) &mdash; grouped into 5 zones instead of checking each plant. Check Zone 1 first &mdash; if it reads dry, the whole run likely is, and you can move faster through the rest.</div>
@@ -1161,7 +1161,7 @@
   </div>
   <div class="plant-card" data-plant="pentas">
     <div class="plant-head">
-      <div class="plant-name">Pentas</div>
+      <div class="plant-name">Pentas <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
     <div class="probe-note">Probe at root ball edge, 2&ndash;3" deep. End-of-row plants often dry faster than middle ones. <strong>#6 is new (7/24, in #4's original spot) &mdash; actual day 0, not day 13 like the others; #4 was relocated near the lava rock, same day, still alive</strong>: check #6 closer to daily regardless of what the shared day-count below says.</div>
@@ -1170,7 +1170,7 @@
   </div>
   <div class="plant-card" data-plant="ixora">
     <div class="plant-head">
-      <div class="plant-name">Ixora</div>
+      <div class="plant-name">Ixora <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Fri &middot; day 0</div>
     </div>
     <div class="probe-note">First time in-ground &mdash; moved from a patio pot 7/24. Probe at root ball edge, 2&ndash;3" deep. Watch for the boom-bust bloom/blackening pattern it showed in the pot; unclear yet if that carries over in-ground.</div>
@@ -1179,7 +1179,7 @@
   </div>
   <div class="plant-card" data-plant="blueberries">
     <div class="plant-head">
-      <div class="plant-name">Blueberries <span class="risk-tag risk-high">High risk</span></div>
+      <div class="plant-name">Blueberries <span class="risk-tag risk-high">High risk</span> <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Fri &middot; day 3 &middot; amended acid pocket only</div>
     </div>
     <div class="probe-note">Exception to the usual root-ball-edge rule: the amended pocket is uniform soil throughout, so probe mid-pocket rather than at an edge &mdash; just stay clear of where the pocket meets the surrounding native sand. <strong>Changed 8/7</strong> &mdash; all readings before this date were taken at the root-ball edge, not mid-pocket.</div>
@@ -1188,7 +1188,7 @@
   </div>
   <div class="plant-card" data-plant="firebush2">
     <div class="plant-head">
-      <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span> <span class="canary">Garage Bed (new)</span></div>
+      <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span> <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Fri &middot; day 0</div>
     </div>
     <div class="probe-note">Separate batch from the North Side firebush &mdash; different bed, different planting date. Probe at root ball edge, 3&ndash;4" deep. Log each plant separately.</div>
@@ -1197,7 +1197,7 @@
   </div>
   <div class="plant-card" data-plant="coontie">
     <div class="plant-head">
-      <div class="plant-name">Coontie <span class="risk-tag risk-high">Rot risk</span></div>
+      <div class="plant-name">Coontie <span class="risk-tag risk-high">Rot risk</span> <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
     <div class="probe-note">Probe at root ball edge. When in doubt, treat as GREEN and skip watering.</div>
@@ -1389,9 +1389,6 @@
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
                    blue: "action-skip", blueText: "Skip. Let it dry before next check." },
     liatris:     { red: "action-water", redText: "Water now, soak at root ball edge (2-3\").",
-                   green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
-                   blue: "action-skip", blueText: "Skip. Let it dry before next check." },
-    monkeygrass2:{ red: "action-water", redText: "Water now, soak at root ball edge (2-3\") \u2014 fresh transplant, treat like a new planting.",
                    green: "action-hold", greenText: "Hold off \u2014 recheck this evening.",
                    blue: "action-skip", blueText: "Skip. Let it dry before next check." },
     salvia:      { red: "action-water", redText: "Water now, soak at root ball edge (2-3\").",
@@ -2131,10 +2128,10 @@
 
   const PLANT_LABELS = {
     bluedaze: 'Blue Daze', pentas: 'Pentas', ixora: 'Ixora', blueberries: 'Blueberries',
-    firebush2: 'Firebush (Garage Bed, new)', cordyline: 'Ti Plants (Cordyline)', coontie: 'Coontie',
+    firebush2: 'Firebush (Garage Bed)', coontie: 'Coontie',
     firebush: 'Firebush (N. Side of House)',
     firespike: 'Firespike Cutting', shrimpplant: 'Shrimp Plant',
-    muhlygrass: 'Muhly Grass (Front Left Bed)', monkeygrass2: 'Monkey Grass (Garage Bed, new)',
+    muhlygrass: 'Muhly Grass (Front Left Bed)',
     milkweed: 'Milkweed (Front Left Bed)', liatris: 'Liatris (Front Left Bed)',
     salvia: 'Salvia coccinea (Front Left Bed)', stumppot: 'Society Garlic + Frogfruit (Stump Pot)',
     blanketflower: 'Blanketflower (Front Left Bed)', coreopsis: "Coreopsis 'UpTick Red' (Front Left Bed)",
@@ -2144,10 +2141,10 @@
   // Planting dates used to auto-compute taper stage (edit here if dates change)
   const PLANT_DATES = {
     bluedaze: '2026-07-24', pentas: '2026-07-11', ixora: '2026-07-24', blueberries: '2026-07-10',
-    firebush2: '2026-07-25', cordyline: '2026-07-25', coontie: '2026-07-11',
+    firebush2: '2026-07-25', coontie: '2026-07-11',
     firebush: '2026-07-10',
     firespike: '2026-07-11', shrimpplant: '2026-07-15',
-    muhlygrass: '2026-07-26', monkeygrass2: '2026-07-26',
+    muhlygrass: '2026-07-26',
     milkweed: '2026-07-28', liatris: '2026-08-06',
     salvia: '2026-07-29', stumppot: '2026-07-29',
     blanketflower: '2026-07-31', coreopsis: '2026-07-31',
@@ -2355,7 +2352,7 @@
 
   // Verb differs for a couple of plants (monkey grass was relocated, not
   // freshly planted). Defaults to 'Planted' if not listed here.
-  const PLANT_VERB = { cordyline: 'Moved', monkeygrass2: 'Relocated', firespikepots: 'Potted', salviapot: 'Potted' };
+  const PLANT_VERB = { firespikepots: 'Potted', salviapot: 'Potted' };
 
   // Any extra context that used to be hardcoded alongside the date/day count.
   const PLANT_META_EXTRA = {
@@ -2365,7 +2362,6 @@
     firespike: 'no root system yet',
     shrimpplant: 'pool cage rock border, part shade after ~1-2pm',
     muhlygrass: '5 clumps, back row',
-    monkeygrass2: 'from Front Left Bed (behind sago), fills gap near crepe myrtle',
     salvia: 'middle row, 6 total (5 fresh + 1 relocated volunteer), bare-soil halo',
     stumppot: '3 Society Garlic + 2 Frogfruit, same pot',
     blanketflower: '9 total, grouped into 3 zones, bare-soil halo',
