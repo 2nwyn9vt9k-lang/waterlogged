@@ -369,6 +369,18 @@
     color: var(--ink);
   }
 
+  .quick-log-amount {
+    width: 84px;
+    flex: none;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+    padding: 8px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--sand);
+    background: var(--paper);
+    color: var(--ink);
+  }
+
   .quick-log-btn {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     font-size: 12.5px;
@@ -1118,9 +1130,10 @@
 
   <div class="quick-log-card">
     <div class="quick-log-title">Quick Log &mdash; No Weather Check</div>
-    <div class="quick-log-subtitle">Use this when you know it rained (today or a past day) &mdash; skips the weather API entirely, since local storms often don't show up in it. No time/duration needed.</div>
+    <div class="quick-log-subtitle">Use this when you know it rained (today or a past day) &mdash; skips the weather API entirely, since local storms often don't show up in it. Add the rain gauge reading in inches if you have one &mdash; it's used as ground truth over the weather estimate; leave it blank to just log that it rained.</div>
     <div class="quick-log-row">
       <input type="date" class="quick-log-date" id="quickLogDate">
+      <input type="number" class="quick-log-amount" id="quickLogAmount" step="0.1" min="0" placeholder="in (opt.)">
       <button class="quick-log-btn" onclick="quickLogRain()">It Rained</button>
     </div>
     <div class="quick-log-confirm" id="quickLogConfirm"></div>
@@ -1152,7 +1165,7 @@
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
     <div class="probe-note">Probe at root ball edge, 2&ndash;3" deep. End-of-row plants often dry faster than middle ones. <strong>#6 is new (7/24, in #4's original spot) &mdash; actual day 0, not day 13 like the others; #4 was relocated near the lava rock, same day, still alive</strong>: check #6 closer to daily regardless of what the shared day-count below says.</div>
-    <div class="instance-list" data-labels="#1,#2,#3,#4,#5,#6 (new 7/24)"></div>
+    <div class="instance-list" data-labels="#1,#2,#4,#5,#6 (new 7/24)"></div>
     <div class="card-summary"></div>
   </div>
   <div class="plant-card" data-plant="ixora">
@@ -1527,6 +1540,34 @@
     try { localStorage.setItem(RAIN_HISTORY_KEY, JSON.stringify(arr)); } catch (e) {}
   }
 
+  // Weather Refresh used to compute a real daily inches total and then throw
+  // it away (only used it for the status-line string) — this persists it
+  // into the permanent rain history so it actually counts as the fallback
+  // rainfall source it's documented to be. Upserts by dateKey + source so
+  // repeated page-loads/manual refreshes the same day update one entry
+  // instead of piling up duplicates; a same-day gauge/manual Quick Log entry
+  // is left alone (gauge readings take priority over the weather estimate,
+  // see computeDailyRainIn).
+  function upsertWeatherRainHistoryEntry(dateKey, amountIn, occurred, timestamp) {
+    const history = loadRainHistory();
+    const idx = history.findIndex(e => e.dateKey === dateKey && e.source === 'weather');
+    const entry = {
+      timestamp: timestamp,
+      dateKey: dateKey,
+      occurred: occurred,
+      events: [{ time: '', duration: '', intensity: '' }],
+      amountIn: amountIn,
+      source: 'weather'
+    };
+    if (idx === -1) {
+      history.unshift(entry);
+    } else {
+      history[idx] = entry;
+    }
+    history.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    saveRainHistoryLog(history.slice(0, 300));
+  }
+
   function clearWeatherStatus() {
     const el = document.getElementById('weatherStatus');
     if (el) { el.classList.remove('show', 'auto', 'error'); el.textContent = ''; }
@@ -1599,9 +1640,15 @@
         occurred: events.length > 0,
         events: events.length ? events : [{ time: '', duration: '', intensity: '' }],
         autoFilled: true,
-        userEdited: false
+        userEdited: false,
+        amountIn: totalIn
       };
       saveRainState(rain);
+      // Persist today's weather-estimated total into permanent rain history
+      // too (was previously computed and discarded) — used as the fallback
+      // rainfall source by the drought-signal deficit model when no gauge
+      // reading has been logged for the day.
+      upsertWeatherRainHistoryEntry(todayDateKey(), totalIn, events.length > 0, Date.now());
       updateRainStatusLine();
       renderRainEvents(rain.events);
       updateRainContextBanner();
@@ -1711,8 +1758,15 @@
   // backdating, since the rest of the app only ever writes to today's date.
   function quickLogRain() {
     const dateInput = document.getElementById('quickLogDate');
+    const amountInput = document.getElementById('quickLogAmount');
     const confirmEl = document.getElementById('quickLogConfirm');
     const dateStr = dateInput && dateInput.value ? dateInput.value : todayDateKey();
+
+    // Rain gauge reading, if entered — treated as ground truth over the
+    // Open-Meteo estimate by computeDailyRainIn(). Optional: leave blank to
+    // just log that it rained with no amount, same as before this existed.
+    const amountRaw = amountInput && amountInput.value !== '' ? parseFloat(amountInput.value) : null;
+    const amountIn = (amountRaw !== null && !isNaN(amountRaw) && amountRaw >= 0) ? amountRaw : null;
 
     // Anchor to local noon on the chosen date so sorting/day-math behaves
     // regardless of timezone offset, and so "today" entries land after any
@@ -1725,7 +1779,9 @@
       dateKey: dateStr,
       occurred: true,
       events: [{ time: '', duration: '', intensity: '' }],
-      quickLogged: true
+      quickLogged: true,
+      amountIn: amountIn,
+      source: amountIn !== null ? 'gauge' : 'manual'
     };
 
     const history = loadRainHistory();
@@ -1741,6 +1797,7 @@
       if (rain.events.length === 0) rain.events.push({ time: '', duration: '', intensity: '' });
       rain.userEdited = true;
       rain.autoFilled = false;
+      if (amountIn !== null) rain.amountIn = amountIn;
       saveRainState(rain);
       updateRainStatusLine();
       renderRainEvents(rain.events);
@@ -1749,11 +1806,12 @@
     updateRainContextBanner();
     renderTodayRainLog();
     renderQuickLogList();
+    if (amountInput) amountInput.value = '';
 
     if (confirmEl) {
       confirmEl.classList.remove('error');
       const label = isToday ? 'today' : new Date(dateStr + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-      confirmEl.textContent = 'Logged rain for ' + label + '.';
+      confirmEl.textContent = 'Logged rain for ' + label + (amountIn !== null ? ' (' + amountIn.toFixed(2) + '")' : '') + '.';
       confirmEl.classList.add('show');
       setTimeout(() => confirmEl.classList.remove('show'), 4000);
     }
@@ -1781,7 +1839,8 @@
     let html = '';
     recent.forEach(e => {
       const label = new Date(e.timestamp).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-      html += '<div class="quick-log-entry"><span>' + label + ' \u2014 rain logged</span>' +
+      const amountLabel = (typeof e.amountIn === 'number') ? ' (' + e.amountIn.toFixed(2) + '")' : '';
+      html += '<div class="quick-log-entry"><span>' + label + ' \u2014 rain logged' + amountLabel + '</span>' +
         '<button class="quick-log-remove" data-ts="' + e.timestamp + '">Undo</button></div>';
     });
     el.innerHTML = html;
@@ -2202,6 +2261,98 @@
     return genericTaperStage(days);
   }
 
+  // ---- Drought Signal ----
+  // A checkbook/water-balance model: running deficit = accumulated daily
+  // water loss minus rainfall, for plants that have already tapered down to
+  // spot-check status (or, for firebush, the extended every-other-day
+  // tail). This is NOT a daily-check replacement — it's an occasional
+  // "is this dry spell bad enough to warrant an off-schedule deep soak"
+  // signal for plants that no longer get probed often. Coontie/Blueberries
+  // ('capped' rule) can never reach an eligible stage, so they're excluded
+  // structurally, not via a maintained list. Computed live from existing
+  // history on every render — nothing new is persisted, so it can't go
+  // stale or desync from the real rain/plant-check logs.
+
+  // Starting estimate for mulched, hand-watered sandy-soil beds in a zone
+  // 10a summer — roughly half of grass reference ET (~0.2-0.25"/day in
+  // August) to account for mulch and shrub/perennial canopy cover. Tune
+  // this after a few weeks against the model/spot-check mismatch notes in
+  // Per-Plant Status.
+  const DROUGHT_SIGNAL_DAILY_LOSS_IN = 0.15;
+  // Matches the standard "~1 inch of water per week" landscape rule of
+  // thumb — the deficit level that triggers an off-schedule-soak alert.
+  const DROUGHT_SIGNAL_THRESHOLD_IN = 1.0;
+  // Don't accumulate indefinitely off a stale start point.
+  const DROUGHT_SIGNAL_LOOKBACK_DAYS = 21;
+  // Fallback estimate for old-style/no-amount rain entries (occurred:true
+  // but no gauge or weather amount logged) — keeps every historical entry
+  // usable without requiring anyone to go back and backfill amounts.
+  const DROUGHT_SIGNAL_UNQUANTIFIED_RAIN_IN = 0.25;
+
+  // True for plants that have tapered down enough that the daily/EOD probe
+  // schedule no longer covers them closely — fully established plants, or
+  // (for 'extended'-rule plants like firebush) the every-other-day tail.
+  // Driven entirely by taperStage()/PLANT_DATES/TAPER_RULES, so any plant
+  // added to those registries later (e.g. a future planting) is picked up
+  // automatically once it reaches the qualifying stage — nothing else to
+  // wire up.
+  function droughtSignalEligible(plant, days) {
+    const stage = taperStage(plant, days);
+    if (stage.cls === 'stage-established') return true;
+    if (TAPER_RULES[plant] === 'extended' && stage.cls === 'stage-eod') return true;
+    return false;
+  }
+
+  // Resolves one inches figure per calendar day from the rain history,
+  // preferring an actual rain-gauge reading (source:'gauge', from Quick Log)
+  // over the Open-Meteo estimate (source:'weather') over a flat fallback for
+  // old entries logged with no amount at all. If a day has more than one
+  // gauge or weather entry (e.g. Quick Log tapped twice), takes the max
+  // rather than summing — avoids double-counting the same storm.
+  function computeDailyRainIn(sortedRain) {
+    const byDate = {};
+    (sortedRain || []).forEach(r => {
+      if (!r.occurred) return;
+      const dateKey = r.dateKey || (r.timestamp ? new Date(r.timestamp).toLocaleDateString('en-CA') : null);
+      if (!dateKey) return;
+      if (!byDate[dateKey]) byDate[dateKey] = { gauge: null, weather: null, unquantified: false };
+      const bucket = byDate[dateKey];
+      if (r.source === 'gauge' && typeof r.amountIn === 'number') {
+        bucket.gauge = bucket.gauge === null ? r.amountIn : Math.max(bucket.gauge, r.amountIn);
+      } else if (r.source === 'weather' && typeof r.amountIn === 'number') {
+        bucket.weather = bucket.weather === null ? r.amountIn : Math.max(bucket.weather, r.amountIn);
+      } else {
+        bucket.unquantified = true;
+      }
+    });
+    const result = {};
+    Object.keys(byDate).forEach(dateKey => {
+      const b = byDate[dateKey];
+      if (b.gauge !== null) result[dateKey] = b.gauge;
+      else if (b.weather !== null) result[dateKey] = b.weather;
+      else if (b.unquantified) result[dateKey] = DROUGHT_SIGNAL_UNQUANTIFIED_RAIN_IN;
+      else result[dateKey] = 0;
+    });
+    return result;
+  }
+
+  // Running water-balance deficit over the lookback window. Capped at 0 on
+  // both ends each day — sandy, fast-draining soil (per garden-care-guide)
+  // doesn't meaningfully "bank" a rain surplus for later.
+  function computeDroughtDeficit(sortedRain) {
+    const dailyRainIn = computeDailyRainIn(sortedRain);
+    let deficit = 0;
+    let daysSinceRealRain = null;
+    for (let i = DROUGHT_SIGNAL_LOOKBACK_DAYS - 1; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000);
+      const dateKey = d.toLocaleDateString('en-CA');
+      const rainIn = dailyRainIn[dateKey] || 0;
+      deficit = Math.max(0, deficit + DROUGHT_SIGNAL_DAILY_LOSS_IN - rainIn);
+      if (rainIn > 0) daysSinceRealRain = i;
+    }
+    return { deficitIn: deficit, daysSinceRealRain: daysSinceRealRain };
+  }
+
   // Verb differs for a couple of plants (monkey grass was relocated, not
   // freshly planted). Defaults to 'Planted' if not listed here.
   const PLANT_VERB = { cordyline: 'Moved', monkeygrass2: 'Relocated', firespikepots: 'Potted', salviapot: 'Potted' };
@@ -2549,6 +2700,7 @@
     const impact = computeRainImpact(sorted, sortedRain);
     const streaks = computeStreaks(sorted);
     const rainStats = computeRainStats(sortedRain);
+    const drought = computeDroughtDeficit(sortedRain);
 
     // --- Needs Attention: always visible, no expanding required. Pulls only
     // the actionable signal out of High-Risk Watch, Dry Streaks, and Rain
@@ -2583,8 +2735,19 @@
         attentionLines.push('<div class="risk-alert warn">Beds are reading drier on rain days than non-rain days (' + diff + ' pts) \u2014 worth a look, could mean checks happen before rain reaches root depth, or sandy soil is draining faster than rain replenishes it.</div>');
       }
     }
+    // Drought Signal \u2014 established plants (and firebush's every-other-day
+    // tail) get spot-checked rarely enough that a running water-balance
+    // deficit is a useful occasional nudge, separate from the per-check
+    // signals above. One line for the whole group, not per-plant \u2014 this is
+    // meant to be an occasional check, not a new daily read.
+    if (drought.deficitIn >= DROUGHT_SIGNAL_THRESHOLD_IN) {
+      const rainNote = drought.daysSinceRealRain === null ? 'no logged rain in the last ' + DROUGHT_SIGNAL_LOOKBACK_DAYS + ' days'
+        : drought.daysSinceRealRain === 0 ? 'rain logged today'
+        : drought.daysSinceRealRain + ' day' + (drought.daysSinceRealRain === 1 ? '' : 's') + ' since logged rain';
+      attentionLines.push('<div class="risk-alert warn">Drought signal: running dry-spell deficit ~' + drought.deficitIn.toFixed(1) + '" across established plants and the firebush tail (' + rainNote + ') \u2014 worth an off-schedule deep soak. Check soil first; skip anything that\u2019s not actually dry.</div>');
+    }
     if (attentionLines.length === 0) {
-      html += '<div class="attention-empty">Nothing needs attention right now \u2014 no high-risk dry readings, no dry streaks of 4+ checks, no rain-pattern anomalies.</div>';
+      html += '<div class="attention-empty">Nothing needs attention right now \u2014 no high-risk dry readings, no dry streaks of 4+ checks, no rain-pattern anomalies, no drought-deficit signal.</div>';
     } else {
       html += attentionLines.join('');
     }
@@ -2599,6 +2762,19 @@
     streaks.forEach(st => {
       if (!maxStreakByPlant[st.plant] || st.count > maxStreakByPlant[st.plant]) maxStreakByPlant[st.plant] = st.count;
     });
+    // Most recent logged zone per plant (sorted is newest-first, so the
+    // first hit per plant wins), used only for the drought-signal
+    // model/spot-check mismatch note below — this is the calibration
+    // signal: it reuses spot-checks Cameron is already doing to flag where
+    // the flat daily-loss estimate is over- or under-shooting reality.
+    const lastReadByPlant = {};
+    sorted.forEach(entry => {
+      if (!entry.raw) return;
+      Object.values(entry.raw).forEach(r => {
+        if (lastReadByPlant[r.plant] === undefined) lastReadByPlant[r.plant] = r.zone;
+      });
+    });
+    const ZONE_WORD = { 0: 'dry', 1: 'moist', 2: 'wet' };
     Object.keys(PLANT_DATES).forEach(plant => {
       const s = plantStats[plant];
       const total = s ? s.dry + s.moist + s.wet : 0;
@@ -2622,6 +2798,14 @@
         html += '<div class="plant-row-taper">' + total + ' reads &middot; ' + pDry + '% dry' + (dayLabel ? ' &middot; ' + dayLabel : '') + streakNote + '</div>';
       } else {
         html += '<div class="plant-row-taper">No structured reads logged yet' + (dayLabel ? ' &middot; ' + dayLabel : '') + '</div>';
+      }
+      if (droughtSignalEligible(plant, days) && lastReadByPlant[plant] !== undefined) {
+        const modelSaysDry = drought.deficitIn >= DROUGHT_SIGNAL_THRESHOLD_IN;
+        const lastReadDry = lastReadByPlant[plant] === 0;
+        if (modelSaysDry !== lastReadDry) {
+          html += '<div class="plant-row-taper">Drought-signal check: model says ' + (modelSaysDry ? 'due for a soak' : 'no signal') +
+            ', last spot-check read ' + ZONE_WORD[lastReadByPlant[plant]] + ' &mdash; worth a look before trusting the model here.</div>';
+        }
       }
       if (plant === 'firespike') {
         const rooting = loadFirespikeRootingState();
