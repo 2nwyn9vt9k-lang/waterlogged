@@ -1273,7 +1273,7 @@
       <div class="plant-meta">Planted 7/31 &middot; day 0 &middot; 9 total</div>
     </div>
     <div class="probe-note">9 plants across the front row, redistributed 7/31 to cover the front-center tip near the birdbath &mdash; too many to check individually, so grouped into 3 zones instead. Bare-soil halo (not mulched) to support self-seeding &mdash; probe right at the root ball edge, 2&ndash;3" deep, not out in the bare soil ring.</div>
-    <div class="instance-list" data-labels="Left zone (toward solar lights/monkey grass),Center zone (birdbath/hook area),Right zone (toward palm)"></div>
+    <div class="instance-list" data-labels="Zone #1 (toward sago palm),Zone #2 (middle/birdbath area),Zone #3 (toward cabbage palms)"></div>
     <div class="card-summary"></div>
   </div>
   <div class="plant-card" data-plant="coreopsis">
@@ -1282,7 +1282,7 @@
       <div class="plant-meta">Planted 7/31 &middot; day 0 &middot; 7 total, all Red</div>
     </div>
     <div class="probe-note">Non-native cultivar (Coreopsis hybrida), replaces Coreopsis leavenworthii. 7 plants interspersed with Blanketflower along the same front row &mdash; grouped into 3 zones, same zone boundaries as Blanketflower since they share the row. Probe at root ball edge, 2&ndash;3" deep. Wants a bit more moisture than true drought-tolerant natives &mdash; don't assume it can skip a check just because neighboring natives can.</div>
-    <div class="instance-list" data-labels="Left zone (toward solar lights/monkey grass),Center zone (birdbath/hook area),Right zone (toward palm)"></div>
+    <div class="instance-list" data-labels="Zone #1 (toward sago palm),Zone #2 (middle/birdbath area),Zone #3 (toward cabbage palms)"></div>
     <div class="card-summary"></div>
   </div>
   <div class="plant-card" data-plant="firebush">
@@ -2067,7 +2067,14 @@
     const raw = {};
     document.querySelectorAll('.plant-card').forEach(card => {
       const plant = card.dataset.plant;
-      const plantName = card.querySelector('.plant-name').childNodes[0].textContent.trim();
+      // Firebush has two separate cards (Garage Bed vs N. Side of House) that both
+      // just say "Firebush" on the card itself -- the bed tag lives in a separate
+      // .canary span the results text doesn't otherwise read. Disambiguate using the
+      // same "Firebush (Garage Bed)" / "Firebush (N. Side of House)" strings PLANT_LABELS
+      // already uses elsewhere (Metrics page, CSV export) so it reads consistently everywhere.
+      const plantName = (plant === 'firebush' || plant === 'firebush2')
+        ? PLANT_LABELS[plant]
+        : card.querySelector('.plant-name').childNodes[0].textContent.trim();
       const rows = card.querySelectorAll('.instance-row');
       rows.forEach(row => {
         const label = row.querySelector('.instance-label').textContent;
