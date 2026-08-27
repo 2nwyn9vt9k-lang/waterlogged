@@ -2274,9 +2274,17 @@
 
   // Per-plant taper timeline type. Anything not listed defaults to 'generic'
   // (monkey grass, pentas, blue daze, shrimp plant all use the generic curve).
+  // Firebush used to have an 'extended' rule here (established ~65 days
+  // instead of the generic 28) with no real basis -- checked against this
+  // project's own records (Cameron, 8/27) and found nothing supporting it:
+  // the nursery's own guidance for these plants is daily for 2 weeks + every
+  // other day for 2 weeks (28 days total, matching the generic curve
+  // exactly), garden-care-guide.md independently estimates ~4-6 weeks for
+  // one batch and "essentially established (~3 weeks in)" for the other,
+  // and garden-history.md shows both batches thriving at day 4 and day 18
+  // with no struggle logged anywhere. Removed -- firebush now uses the same
+  // generic curve as everything else.
   const TAPER_RULES = {
-    firebush: 'extended',
-    firebush2: 'extended',
     blueberries: 'capped',
     coontie: 'capped'
   };
@@ -2299,11 +2307,6 @@
   // the plain PLANT_DATES/daysSince every other plant uses is correct again
   // -- a whole card graduating together is now actually true for Pentas.
 
-  // Firebush establishes slower than the weekend annuals/perennials but does
-  // eventually reach spot-check status \u2014 stretched to the middle of the
-  // 60\u201370 day range instead of the generic 28-day cutoff.
-  const FIREBUSH_ESTABLISHED_DAY = 65;
-
   function genericTaperStage(days) {
     if (days <= 7) return { label: '2x/day check', cls: 'stage-2x' };
     if (days <= 14) return { label: '1x/day check', cls: 'stage-1x' };
@@ -2313,13 +2316,6 @@
 
   function taperStage(plant, days) {
     const rule = TAPER_RULES[plant] || 'generic';
-
-    if (rule === 'extended') {
-      if (days <= 7) return { label: '2x/day check', cls: 'stage-2x' };
-      if (days <= 14) return { label: '1x/day check', cls: 'stage-1x' };
-      if (days < FIREBUSH_ESTABLISHED_DAY) return { label: 'Every other day', cls: 'stage-eod' };
-      return { label: 'Established, spot check', cls: 'stage-established' };
-    }
 
     if (rule === 'capped') {
       // Never auto-advances past the 1x/day tier \u2014 stays high-risk/manual,
@@ -2335,8 +2331,7 @@
   // ---- Drought Signal ----
   // A checkbook/water-balance model: running deficit = accumulated daily
   // water loss minus rainfall, for plants that have already tapered down to
-  // spot-check status (or, for firebush, the extended every-other-day
-  // tail). This is NOT a daily-check replacement — it's an occasional
+  // spot-check status. This is NOT a daily-check replacement — it's an occasional
   // "is this dry spell bad enough to warrant an off-schedule deep soak"
   // signal for plants that no longer get probed often. Coontie/Blueberries
   // ('capped' rule) can never reach an eligible stage, so they're excluded
@@ -2361,17 +2356,13 @@
   const DROUGHT_SIGNAL_UNQUANTIFIED_RAIN_IN = 0.25;
 
   // True for plants that have tapered down enough that the daily/EOD probe
-  // schedule no longer covers them closely — fully established plants, or
-  // (for 'extended'-rule plants like firebush) the every-other-day tail.
+  // schedule no longer covers them closely — i.e. fully established plants.
   // Driven entirely by taperStage()/PLANT_DATES/TAPER_RULES, so any plant
   // added to those registries later (e.g. a future planting) is picked up
   // automatically once it reaches the qualifying stage — nothing else to
   // wire up.
   function droughtSignalEligible(plant, days) {
-    const stage = taperStage(plant, days);
-    if (stage.cls === 'stage-established') return true;
-    if (TAPER_RULES[plant] === 'extended' && stage.cls === 'stage-eod') return true;
-    return false;
+    return taperStage(plant, days).cls === 'stage-established';
   }
 
   // Resolves one inches figure per calendar day from the rain history,
@@ -2717,7 +2708,7 @@
       const stage = taperStage(plant, days);
       const isPot = POT_PLANTS.includes(plant);
       const isCapped = TAPER_RULES[plant] === 'capped';
-      const estDays = TAPER_RULES[plant] === 'extended' ? FIREBUSH_ESTABLISHED_DAY : 28;
+      const estDays = 28;
       const plantedDate = new Date(PLANT_DATES[plant] + 'T00:00:00');
       const estDate = new Date(plantedDate.getTime() + estDays * 86400000);
       return { plant, label: PLANT_LABELS[plant] || plant, stage, isPot, isCapped, plantedDate, estDate };
@@ -2845,7 +2836,7 @@
       const rainNote = drought.daysSinceRealRain === null ? 'no logged rain in the last ' + DROUGHT_SIGNAL_LOOKBACK_DAYS + ' days'
         : drought.daysSinceRealRain === 0 ? 'rain logged today'
         : drought.daysSinceRealRain + ' day' + (drought.daysSinceRealRain === 1 ? '' : 's') + ' since logged rain';
-      attentionLines.push('<div class="risk-alert warn">Drought signal: running dry-spell deficit ~' + drought.deficitIn.toFixed(1) + '" across established plants and the firebush tail (' + rainNote + ') \u2014 worth an off-schedule deep soak. Check soil first; skip anything that\u2019s not actually dry.</div>');
+      attentionLines.push('<div class="risk-alert warn">Drought signal: running dry-spell deficit ~' + drought.deficitIn.toFixed(1) + '" across established plants (' + rainNote + ') \u2014 worth an off-schedule deep soak. Check soil first; skip anything that\u2019s not actually dry.</div>');
     }
     if (attentionLines.length === 0) {
       html += '<div class="attention-empty">Nothing needs attention right now \u2014 no high-risk dry readings, no dry streaks of 4+ checks, no rain-pattern anomalies, no drought-deficit signal.</div>';
@@ -3197,8 +3188,8 @@
 
   // Buckets every planted/potted item into needs-a-plan / watered-rarely-by-
   // design / should-coast-fine, plus a worst-case drought-deficit projection
-  // for the established/EOD-tail group. Shared by the render and the
-  // copy-for-partner text so the two can never drift apart.
+  // for the established group. Shared by the render and the copy-for-partner
+  // text so the two can never drift apart.
   function computeAwayPlan(days) {
     const rainHistory = loadRainHistory();
     const sortedRain = [...rainHistory].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -3255,7 +3246,7 @@
     if (plan.projectedDeficit >= DROUGHT_SIGNAL_THRESHOLD_IN) {
       html += '<h2 class="section-title">Established Group — Drought Projection</h2>';
       html += '<div class="card"><div class="card-inner">';
-      html += '<div class="risk-alert warn">Worst case (zero rain the whole trip): the established/EOD-tail group’s water-balance deficit would reach ~' + plan.projectedDeficit.toFixed(1) + '" by the time you’re back (currently ~' + plan.currentDeficit.toFixed(1) + '"). Worth a deep soak the day you leave, or asking someone for one mid-trip check if it stays dry.</div>';
+      html += '<div class="risk-alert warn">Worst case (zero rain the whole trip): the established group’s water-balance deficit would reach ~' + plan.projectedDeficit.toFixed(1) + '" by the time you’re back (currently ~' + plan.currentDeficit.toFixed(1) + '"). Worth a deep soak the day you leave, or asking someone for one mid-trip check if it stays dry.</div>';
       html += '</div></div>';
     }
 
