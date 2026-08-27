@@ -939,6 +939,27 @@
     color: var(--ink-soft);
   }
 
+  .card-care-inline {
+    margin: 0 16px 10px 16px;
+    padding: 10px 12px;
+    background: var(--sand-light);
+    border: 1px dashed var(--leaf-light);
+    border-radius: 8px;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .card-care-inline .care-item-title { font-size: 12.5px; }
+  .card-care-inline .care-item-detail { font-size: 11.5px; }
+  .card-care-inline .care-btn { margin-top: 8px; }
+
+  .card-care-note {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11px;
+    color: var(--leaf);
+    padding: 0 16px 8px 16px;
+    line-height: 1.4;
+  }
+
   .care-item {
     padding: 12px 0;
     border-bottom: 1px solid var(--sand);
@@ -1048,6 +1069,7 @@
 
   .tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 14px;
   }
@@ -1094,8 +1116,8 @@
   <div class="sub">Log each individual plant &mdash; groups can read differently plant to plant</div>
   <div class="tabs">
     <button class="tab-btn active" id="tabBtnCheck" onclick="showTab('check')">Moisture Check</button>
-    <button class="tab-btn" id="tabBtnCare" onclick="showTab('care')">Care Tasks<span class="tab-dot" id="careDot"></span></button>
     <button class="tab-btn" id="tabBtnMetrics" onclick="showTab('metrics')">Patterns &amp; Metrics</button>
+    <button class="tab-btn" id="tabBtnAway" onclick="showTab('away')">Away Mode</button>
   </div>
 </header>
 
@@ -1109,10 +1131,11 @@
 <div class="howto">
   <div class="t">How to Probe</div>
   <ol>
-    <li>Insert 3&ndash;4" deep at the <strong>edge of the root ball</strong> &mdash; not dead center, not touching the stem.</li>
-    <li><strong>Blueberries are the one exception to rule 1:</strong> don't probe at the root-ball edge &mdash; the amended pocket is uniform soil throughout, so anywhere inside it works. Probe mid-pocket; just stay clear of the outer edge where it meets native sand.</li>
-    <li><strong>Small 2" plugs/seedlings</strong> (e.g. the Liatris seedlings): probe shallower &mdash; 1&ndash;2", not 3&ndash;4" &mdash; the whole root ball is only about 2" deep.</li>
-    <li><strong>Reading sits right on the 3/4 border?</strong> Pull the probe, move it an inch or two over (still at the root ball edge), and recheck. Still borderline? Default to GREEN/hold &mdash; safer to wait than to risk overwatering, especially for blueberries and coontie.</li>
+    <li>Insert at the <strong>edge of the root ball</strong> &mdash; not dead center, not touching the stem. Depth depends on pot size: <strong>2&ndash;3"</strong> for most 1-gal/4" perennials and annuals (most of the yard), <strong>3&ndash;4"</strong> for bigger shrub-size stock (firebush, coontie).</li>
+    <li><strong>Blueberries are the one exception to the edge rule:</strong> don't probe at the root-ball edge &mdash; the amended pocket is uniform soil throughout, so anywhere inside it works. Probe mid-pocket; just stay clear of the outer edge where it meets native sand.</li>
+    <li><strong>Small 2" plugs/seedlings</strong> (e.g. the Liatris seedlings): probe shallower still &mdash; 1&ndash;2" &mdash; the whole root ball is only about 2" deep.</li>
+    <li><strong>Potted plants</strong> (Society Garlic/Frogfruit pot, Porterweed, Firespike/Salvia cuttings): skip the probe &mdash; check soil surface/first inch by feel instead. Pots dry differently than beds.</li>
+    <li><strong>Reading sits right on a depth/border line?</strong> Pull the probe, move it an inch or two over (still at the root ball edge), and recheck. Still borderline? Default to GREEN/hold &mdash; safer to wait than to risk overwatering, especially for blueberries and coontie.</li>
   </ol>
 </div>
 
@@ -1144,7 +1167,7 @@
 <div class="rain-context-banner" id="rainContextBanner"></div>
 
 <h2 class="section-title">
-  <span>Weekend Plantings</span>
+  <span>Active Watering</span>
   <span id="progressLabel">0 / 0 logged</span>
 </h2>
 
@@ -1155,7 +1178,8 @@
       <div class="plant-name">Blue Daze <span class="canary">Garage Bed</span> <span class="canary">Bed canary</span></div>
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
-    <div class="probe-note">23 total now (5 original + 18 new 7/24) &mdash; grouped into 5 zones instead of checking each plant. Check Zone 1 first &mdash; if it reads dry, the whole run likely is, and you can move faster through the rest.</div>
+    <div class="probe-note">Bed’s dryness canary — if this reads dry, the rest of the bed likely is too.</div>
+    <div class="card-care-note">Care: shear back if it gets leggy/vine-y rather than staying mounded &mdash; as-needed, once established, tolerant of a hard trim.</div>
     <div class="instance-list" data-labels="Zone 1 - garage end (sidewalk row),Zone 2 - middle (sidewalk row),Zone 3 - walkway end (sidewalk row),Zone 4 - garage end (2nd row - lamps),Zone 5 - walkway end (2nd row - lamps)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1164,7 +1188,7 @@
       <div class="plant-name">Ixora <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Fri &middot; day 0</div>
     </div>
-    <div class="probe-note">First time in-ground &mdash; moved from a patio pot 7/24. Probe at root ball edge, 2&ndash;3" deep. Watch for the boom-bust bloom/blackening pattern it showed in the pot; unclear yet if that carries over in-ground.</div>
+    <div class="probe-note">Watch: recovering from scale, Round 2 neem applied 8/20. Sooty mold residue on lower leaves will fade on its own as it’s watered/rained off — round 3 neem if scale reappears.</div>
     <div class="instance-list" data-labels="#1"></div>
     <div class="card-summary"></div>
   </div>
@@ -1173,8 +1197,17 @@
       <div class="plant-name">Pentas <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
-    <div class="probe-note">Probe at root ball edge, 2&ndash;3" deep. End-of-row plants often dry faster than middle ones. Rows below follow walking order (4, 1, 2, 7, 6, 5), not planting order. <strong>#7 is new (8/15, planted in #3's original spot via soil-refresh method)</strong> &mdash; actual day 0, check closer to daily regardless of the shared day-count below.</div>
-    <div class="instance-list" data-labels="#4,#1,#2,#7 (new 8/15),#6 (new 7/24),#5"></div>
+    <div class="probe-note">Watch for stem rot at the base (soft, foul-smelling) — #4 had a scare earlier but was cleared. Occasional yellow/brown lower leaves are normal aging, not a concern. Walking order below is 4, 1, 2, 6, 5 (not planting order) — end-of-row plants can dry faster than middle ones.</div>
+    <div class="instance-list" data-labels="#4,#1,#2,#6,#5"></div>
+    <div class="card-summary"></div>
+  </div>
+  <div class="plant-card" data-plant="pentas7">
+    <div class="plant-head">
+      <div class="plant-name">Pentas #7 <span class="canary">Garage Bed</span></div>
+      <div class="plant-meta">Planted Fri, Aug 15 &middot; day 0</div>
+    </div>
+    <div class="probe-note">New planting in #3's old spot (soil-refresh method), separate from the rest of the row — still establishing, check daily until it settles in.</div>
+    <div class="instance-list" data-labels="#7"></div>
     <div class="card-summary"></div>
   </div>
   <div class="plant-card" data-plant="gomphrena">
@@ -1182,7 +1215,7 @@
       <div class="plant-name">Gomphrena 'Ping Pong' <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Sat &middot; day 0</div>
     </div>
-    <div class="probe-note">4 total, zigzag row directly behind the pink pentas row &mdash; substitute for the unavailable purple pentas. Probe at root ball edge, 2&ndash;3" deep. Log each plant separately.</div>
+    <div class="probe-note">Watch for pale/blotchy leaf patches (seen on #3, possible fungal leaf spot) — cosmetic so far, flag if it spreads or turns brown/black.</div>
     <div class="instance-list" data-labels="#1,#2,#3,#4"></div>
     <div class="card-summary"></div>
   </div>
@@ -1191,7 +1224,8 @@
       <div class="plant-name">Blueberries <span class="risk-tag risk-high">High risk</span> <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Fri &middot; day 3 &middot; amended acid pocket only</div>
     </div>
-    <div class="probe-note">Exception to the usual root-ball-edge rule: the amended pocket is uniform soil throughout, so probe mid-pocket rather than at an edge &mdash; just stay clear of where the pocket meets the surrounding native sand. <strong>Changed 8/7</strong> &mdash; all readings before this date were taken at the root-ball edge, not mid-pocket.</div>
+    <div class="probe-note">Rot-risk — when in doubt, treat as GREEN and skip. Yellow leaves with green veins later = pH stress, not a watering issue. #1 has read wet from rain alone (possible drainage difference at that spot) — just worth noting, not urgent.</div>
+    <div class="card-care-inline" id="cardCare-blueberries"></div>
     <div class="instance-list" data-labels="#1,#2"></div>
     <div class="card-summary"></div>
   </div>
@@ -1200,7 +1234,8 @@
       <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span> <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Fri &middot; day 0</div>
     </div>
-    <div class="probe-note">Separate batch from the North Side firebush &mdash; different bed, different planting date. Probe at root ball edge, 3&ndash;4" deep. Log each plant separately.</div>
+    <div class="probe-note">Separate batch from the North Side firebush (different bed). All three healthy, good color, steady bloom.</div>
+    <div class="card-care-note">Care: light tip-pruning for shape once established — optional, not urgent, already blooming well.</div>
     <div class="instance-list" data-labels="#1,#2,#3"></div>
     <div class="card-summary"></div>
   </div>
@@ -1209,7 +1244,8 @@
       <div class="plant-name">Coontie <span class="risk-tag risk-high">Rot risk</span> <span class="canary">Garage Bed</span></div>
       <div class="plant-meta">Planted Sat &middot; day 2</div>
     </div>
-    <div class="probe-note">Probe at root ball edge. When in doubt, treat as GREEN and skip watering.</div>
+    <div class="probe-note">When in doubt, treat as GREEN and skip watering. Soft/mushy spots at the base mean rot; dry/brittle browning on an individual frond is normal aging — they can look similar at a glance, so check by feel if unsure.</div>
+    <div class="card-care-inline" id="cardCare-coontie"></div>
     <div class="instance-list" data-labels="#1,#2"></div>
     <div class="card-summary"></div>
   </div>
@@ -1218,7 +1254,7 @@
       <div class="plant-name">Muhly Grass <span class="canary">Front Left Bed</span></div>
       <div class="plant-meta">Planted Sun &middot; day 0</div>
     </div>
-    <div class="probe-note">5 clumps, back row: 4 left of the stump, 1 on the far side of the cabbage palms. Native, drought-tolerant once established &mdash; but still a fresh planting, so follow the normal new-planting taper for now. Probe at root ball edge, 2&ndash;3" deep.</div>
+    <div class="probe-note">Native, drought-tolerant once established. Not yet in bloom — expected Oct&ndash;Nov.</div>
     <div class="instance-list" data-labels="Clump 1,Clump 2,Clump 3,Clump 4,Clump 5 (far side of cabbage palms)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1227,7 +1263,7 @@
       <div class="plant-name">Milkweed (Asclepias tuberosa) <span class="canary">Front Left Bed</span></div>
       <div class="plant-meta">Planted Tue 7/28 &middot; day 1 &middot; all 6 in</div>
     </div>
-    <div class="probe-note">Native. Full 6 planted 7/28, split into two clusters of 3 bookending the Salvia (middle) row &mdash; one clump sago end, one clump monkey grass end. Plants within a cluster share soil closely enough that one probe reading per cluster is enough &mdash; no need to check all 6 individually. Probe at root ball edge, 2&ndash;3" deep.</div>
+    <div class="probe-note">Native. Die-back-and-resprout at the base is normal establishment behavior for this species, not a stress sign.</div>
     <div class="instance-list" data-labels="Cluster 1 (sago end),Cluster 2 (monkey grass end)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1236,7 +1272,7 @@
       <div class="plant-name">Salvia coccinea <span class="canary">Front Left Bed, middle row</span></div>
       <div class="plant-meta">Planted 7/29 &middot; day 0</div>
     </div>
-    <div class="probe-note">Native. 6 total (5 fresh from Hollie's + 1 relocated volunteer that fills the middle row's 6th spot). Bare-soil halo, not mulched, to support self-seeding &mdash; probe right at the root ball edge, 2&ndash;3" deep, not out in the bare soil ring. Splits into 3 natural clumps rather than one even row &mdash; check by zone: sago end, middle, cabbage palm end.</div>
+    <div class="probe-note">Watch: mild fungal leaf spot (yellowing + black speckling) present in both clumps — cosmetic so far, no action beyond normal care unless it spreads further or worsens.</div>
     <div class="instance-list" data-labels="Zone 1 (sago end),Zone 2 (middle),Zone 3 (cabbage palm end)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1245,7 +1281,7 @@
       <div class="plant-name">Bee Balm <span class="risk-tag risk-med">Medium risk</span> <span class="canary">Front Left Bed, middle row</span></div>
       <div class="plant-meta">Planted Sat &middot; day 0</div>
     </div>
-    <div class="probe-note">1 plant, ID reasonably confident as Monarda punctata (spotted bee balm), not 100% confirmed &mdash; pre-bloom. Off-plan Hollie's find, picked over typical floppy retail stock for standing upright on its own. Main stem upright with good green color; midday leaf curl/droop is heat wilt in full sun, not decline. Probe at root ball edge, 2&ndash;3" deep.</div>
+    <div class="probe-note">Midday leaf curl/droop is normal heat wilt in full sun, not decline.</div>
     <div class="instance-list" data-labels="#1"></div>
     <div class="card-summary"></div>
   </div>
@@ -1254,7 +1290,8 @@
       <div class="plant-name">Society Garlic + Frogfruit <span class="canary">Stump pot, potted</span></div>
       <div class="plant-meta">Planted 7/29 &middot; day 0</div>
     </div>
-    <div class="probe-note">Potted accent on the palm stump: 3 Society Garlic (Tulbaghia violacea, non-native but non-invasive) + 2 Frogfruit (Phyla nodiflora, native) trailing over the rim. Same pot, same soil &mdash; one reading covers both. Pots dry out faster than in-ground beds, so don't assume the same schedule as the rest of the bed. Probe 2&ndash;3" deep, mid-pot.</div>
+    <div class="probe-note">Society Garlic's minor leaf-tip yellowing is normal, not a concern.</div>
+    <div class="card-care-inline" id="cardCare-stumppot"></div>
     <div class="instance-list" data-labels="Pot"></div>
     <div class="card-summary"></div>
   </div>
@@ -1263,7 +1300,7 @@
       <div class="plant-name">Liatris tenuifolia <span class="canary">Front Left Bed, back row</span></div>
       <div class="plant-meta">Planted 7/28 + 8/6 &middot; 12 of 12 in</div>
     </div>
-    <div class="probe-note">Native. 12 total: 6 x 1-gal (planted 7/28, two clusters of 3 &mdash; Cluster 1 middle, Cluster 2 cabbage palm end) + 6 x 2" seedlings (planted 8/6, two clusters of 3 &mdash; one left of the stump, one middle). Walking order from the stump: seedlings, 1-gal, seedlings, 1-gal. The seedlings are small plugs &mdash; closer monitoring than the established 1-gal plants, and probe shallower (1&ndash;2", not 2&ndash;3") since the whole root ball is only about 2" deep. One reading per cluster/zone is enough.</div>
+    <div class="probe-note">Seedlings need closer watching and a shallower probe than the 1-gal spikes — their whole root ball is only ~2" deep. Bloom starts top-down; purple/brown color at the tip means it's begun.</div>
     <div class="instance-list" data-labels="2&quot; Seedling Cluster (left of stump),Cluster 1 (middle),2&quot; Seedling Cluster (middle),Cluster 2 (cabbage palm end)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1272,7 +1309,7 @@
       <div class="plant-name">Blanketflower <span class="canary">Front Left Bed, front row</span></div>
       <div class="plant-meta">Planted 7/31 &middot; day 0 &middot; 9 total</div>
     </div>
-    <div class="probe-note">9 plants across the front row, redistributed 7/31 to cover the front-center tip near the birdbath &mdash; too many to check individually, so grouped into 3 zones instead. Bare-soil halo (not mulched) to support self-seeding &mdash; probe right at the root ball edge, 2&ndash;3" deep, not out in the bare soil ring.</div>
+    <div class="probe-note">Bare-soil halo around these is deliberate (supports self-seeding), not neglected mulch. Spent blooms going to seed is expected — no deadheading needed.</div>
     <div class="instance-list" data-labels="Zone #1 (toward sago palm),Zone #2 (middle/birdbath area),Zone #3 (toward cabbage palms)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1281,7 +1318,7 @@
       <div class="plant-name">Coreopsis 'UpTick Red' <span class="canary">Front Left Bed, front row</span></div>
       <div class="plant-meta">Planted 7/31 &middot; day 0 &middot; 7 total, all Red</div>
     </div>
-    <div class="probe-note">Non-native cultivar (Coreopsis hybrida), replaces Coreopsis leavenworthii. 7 plants interspersed with Blanketflower along the same front row &mdash; grouped into 3 zones, same zone boundaries as Blanketflower since they share the row. Probe at root ball edge, 2&ndash;3" deep. Wants a bit more moisture than true drought-tolerant natives &mdash; don't assume it can skip a check just because neighboring natives can.</div>
+    <div class="probe-note">Wants more moisture than the true natives nearby — don't skip a check just because they can. Spent blooms going to seed is expected — no deadheading needed.</div>
     <div class="instance-list" data-labels="Zone #1 (toward sago palm),Zone #2 (middle/birdbath area),Zone #3 (toward cabbage palms)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1290,7 +1327,8 @@
       <div class="plant-name">Firebush <span class="risk-tag risk-med">Medium risk</span> <span class="canary">North Side of House</span></div>
       <div class="plant-meta">Planted Fri &middot; day 3 &middot; north side of house</div>
     </div>
-    <div class="probe-note">Probe at root ball edge, 3&ndash;4" deep. Log each plant separately &mdash; a smaller or edge plant can dry faster than the others.</div>
+    <div class="probe-note">Log each plant separately — a smaller or edge plant can dry faster than the others.</div>
+    <div class="card-care-note">Care: light tip-pruning for shape once established &mdash; optional, not urgent, already blooming well.</div>
     <div class="instance-list" data-labels="#1,#2,#3"></div>
     <div class="card-summary"></div>
   </div>
@@ -1299,7 +1337,6 @@
       <div class="plant-name">Firespike Cutting <span class="canary">North Fence/Pool Cage Area</span></div>
       <div class="plant-meta">Planted Sat &middot; day 35</div>
     </div>
-    <div class="probe-note">Rooted &mdash; confirmed via gentle tug test, fresh growth present. Same taper as other in-ground plantings now. Probe at root ball edge, 2&ndash;3" deep.</div>
     <div class="instance-list" data-labels="#1"></div>
     <div class="card-summary"></div>
   </div>
@@ -1308,7 +1345,6 @@
       <div class="plant-name">Shrimp Plant <span class="risk-tag risk-med">Medium risk</span></div>
       <div class="plant-meta">Planted Wed 7/15 &middot; day 0 &middot; pool cage rock border, part shade after ~1-2pm</div>
     </div>
-    <div class="probe-note">Probe at root ball edge, 2&ndash;3" deep. New plantings, not yet established &mdash; follow the same 2x/day taper as the other weekend plantings.</div>
     <div class="instance-list" data-labels="#1 (closest to yard),#2 (closest to patio)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1317,7 +1353,7 @@
       <div class="plant-name">Blue Flag Iris <span class="canary">Pool Cage Bromeliad Border</span></div>
       <div class="plant-meta">Planted Sat &middot; day 0</div>
     </div>
-    <div class="probe-note">2 total, between the monkey grass clusters next to the yellow shrimp plants, positioned out of the direct gutter-waterfall line. Probe at root ball edge, 2&ndash;3" deep. Unlike most plants here, this species tolerates flooding/standing water well &mdash; a wet reading isn't a concern the way it would be for a rot-risk plant.</div>
+    <div class="probe-note">Unlike most plants here, this species tolerates standing water well — a wet reading isn't a concern.</div>
     <div class="instance-list" data-labels="#1 (closest to yard),#2 (closest to patio and stump)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1326,7 +1362,7 @@
       <div class="plant-name">Blue Porterweed <span class="risk-tag risk-high">Transplant shock</span> <span class="canary">Potted, patio</span></div>
       <div class="plant-meta">Potted 8/14 &middot; day 1</div>
     </div>
-    <div class="probe-note">Native. Dug up from the North Fence/Pool Cage bed 8/14 &mdash; root system essentially gone (dig turned up soil, no rootball). Flops in direct sun; moved to the shady part of the patio 8/15. Check soil surface/first inch by feel, keep evenly moist (not soggy) while it tries to regrow roots &mdash; pots dry faster than the bed.</div>
+    <div class="probe-note">Should tolerate more sun again once roots reestablish — not sun-tested since the 8/15 flop.</div>
     <div class="instance-list" data-labels="Pot"></div>
     <div class="card-summary"></div>
   </div>
@@ -1335,7 +1371,6 @@
       <div class="plant-name">Firespike Cuttings (potted) <span class="risk-tag risk-med">Medium risk</span></div>
       <div class="plant-meta">Potted Sun, Aug 9 &middot; day 0</div>
     </div>
-    <div class="probe-note">All 6 original jar cuttings now potted (1 of the 6 was discarded 8/15 as rotted). #1&ndash;#2 potted 8/9, already rooted before potting. #3&ndash;#5 potted 8/26 regardless of root development &mdash; root status unconfirmed on these, so check them a little more closely for the first couple weeks than #1&ndash;#2. Check soil surface/first inch by feel, keep consistently moist (not soggy). Log each pot separately.</div>
     <div class="instance-list" data-labels="#1,#2,#3 (new 8/26 &ndash; root unconfirmed),#4 (new 8/26 &ndash; root unconfirmed),#5 (new 8/26 &ndash; root unconfirmed)"></div>
     <div class="card-summary"></div>
   </div>
@@ -1344,12 +1379,25 @@
       <div class="plant-name">Salvia Cuttings (potted) <span class="risk-tag risk-med">Medium risk</span></div>
       <div class="plant-meta">Potted Sun, Aug 9 &middot; day 0</div>
     </div>
-    <div class="probe-note">All 3 jar cuttings now potted. #1 potted 8/9, well-rooted before potting. #2&ndash;#3 potted 8/26 regardless of root development &mdash; root status unconfirmed on these, so check them a little more closely for the first couple weeks than #1. Destination once established: fill thin spots in the Front Left Bed salvia middle row. Check soil surface/first inch by feel, keep consistently moist (not soggy).</div>
     <div class="instance-list" data-labels="#1,#2 (new 8/26 &ndash; root unconfirmed),#3 (new 8/26 &ndash; root unconfirmed)"></div>
     <div class="card-summary"></div>
   </div>
 
 </section>
+
+<details class="metrics-details" id="establishedDetails" style="margin:0 16px 12px 16px;">
+  <summary>Established &mdash; spot check only (<span id="establishedCount">0</span>)</summary>
+  <div class="card"><div class="card-inner">
+    <div class="probe-note" style="padding:0 0 10px 0;">These have tapered past daily/EOD watering and moved here automatically once they hit established status. Still logged the same way if you want to spot-check one &mdash; they just don't clutter the main list anymore. Pots and rot-risk plants never move here, even once "established," since they don't behave the same way as an in-ground bed planting.</div>
+    <div id="establishedList"></div>
+  </div></div>
+</details>
+
+<h2 class="section-title"><span>Sago Palm</span><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;">not water-tracked</span></h2>
+<div class="card" style="margin:0 16px 12px 16px;"><div class="card-inner">
+  <div class="probe-note" style="padding:0 0 10px 0;">Deep-rooted established palm, not part of the moisture-probe routine &mdash; its two care logs live here instead, since Moisture Check is where you're already looking daily.</div>
+  <div id="sagoCareBody"></div>
+</div></div>
 
 <button class="reset-btn" id="resultsBtn" onclick="showResults()">Show Today's Watering Results</button>
 
@@ -1378,12 +1426,12 @@
 </div>
 </div>
 
-<div class="tab-panel" id="careTab">
-<div id="careApp"></div>
-</div>
-
 <div class="tab-panel" id="metricsTab">
 <div id="app"></div>
+</div>
+
+<div class="tab-panel" id="awayTab">
+<div id="awayApp"></div>
 </div>
 
 <script>
@@ -1458,6 +1506,13 @@
                    green: "action-hold", greenText: "Good \u2014 evenly moist is the target, leave it.",
                    blue: "action-skip", blueText: "Skip. Let it dry before next check \u2014 avoid soggy pot soil during hardening off." }
   };
+
+  // Pentas #7 is its own card (planted 8/15 into #3's old spot, five weeks
+  // after the rest of the row) so it can taper on its own schedule instead
+  // of dragging the whole Pentas card's establishment date around, or
+  // getting swept into Established before it's actually ready. Same
+  // watering rule as the rest of the row.
+  RULES.pentas7 = RULES.pentas;
 
   const ZONE_LABELS_STD = ['RED', 'GREEN', 'BLUE'];
   const ZONE_LABELS_DWM = ['DRY', 'MOIST', 'WET'];
@@ -2182,7 +2237,7 @@
 
 
   const PLANT_LABELS = {
-    bluedaze: 'Blue Daze', pentas: 'Pentas', gomphrena: "Gomphrena 'Ping Pong' (Garage Bed)",
+    bluedaze: 'Blue Daze', pentas: 'Pentas', pentas7: 'Pentas #7 (new planting)', gomphrena: "Gomphrena 'Ping Pong' (Garage Bed)",
     ixora: 'Ixora', blueberries: 'Blueberries',
     firebush2: 'Firebush (Garage Bed)', coontie: 'Coontie',
     firebush: 'Firebush (N. Side of House)',
@@ -2198,7 +2253,7 @@
 
   // Planting dates used to auto-compute taper stage (edit here if dates change)
   const PLANT_DATES = {
-    bluedaze: '2026-07-24', pentas: '2026-07-11', gomphrena: '2026-08-15',
+    bluedaze: '2026-07-24', pentas: '2026-07-11', pentas7: '2026-08-15', gomphrena: '2026-08-15',
     ixora: '2026-07-24', blueberries: '2026-07-10',
     firebush2: '2026-07-25', coontie: '2026-07-11',
     firebush: '2026-07-10',
@@ -2225,6 +2280,24 @@
     blueberries: 'capped',
     coontie: 'capped'
   };
+
+  // Potted plants dry out on their own clock regardless of days-since-planting
+  // -- the generic/extended establishment curve doesn't apply to them the way
+  // it does an in-ground bed planting. Used to (a) keep them out of the
+  // Established/spot-check group in the Moisture Check tab no matter how old
+  // they get, and (b) always flag them in Away Mode.
+  const POT_PLANTS = ['stumppot', 'firespikepots', 'salviapot', 'porterweed'];
+
+  // Rot-risk plants watered deliberately rarely/manually (see garden-inventory.md)
+  // -- in Away Mode these are reassurance items, not warnings: leaving them
+  // alone for a trip is closer to correct care than having someone water them.
+  const AWAY_LOW_WATER_BY_DESIGN = ['coontie', 'blueberries'];
+
+  // (Previously had a PLANT_STAGE_OVERRIDE_DATE/stageDaysSince hack here for
+  // Pentas #7 being much younger than the rest of that card. Removed in
+  // favor of the real fix: #7 is its own card now (see pentas7 below), so
+  // the plain PLANT_DATES/daysSince every other plant uses is correct again
+  // -- a whole card graduating together is now actually true for Pentas.
 
   // Firebush establishes slower than the weekend annuals/perennials but does
   // eventually reach spot-check status \u2014 stretched to the middle of the
@@ -2397,6 +2470,36 @@
       if (metaEl && PLANT_DATES[plant]) metaEl.textContent = formatPlantMeta(plant);
     });
   }
+
+  // Moves any plant-card that has tapered to 'stage-established' (and isn't a
+  // pot -- see POT_PLANTS above) out of the main Active Watering list and into
+  // the collapsed Established group below it. Pure DOM reparenting, runs once
+  // on load -- doesn't touch history/state, and updateProgress()'s
+  // document-wide .instance-row query still counts everything regardless of
+  // which container a card sits in. Re-run this after reload each day; a
+  // plant that crosses the established threshold overnight moves down
+  // automatically next time the page loads.
+  function groupPlantCardsByStage() {
+    const establishedList = document.getElementById('establishedList');
+    const establishedDetails = document.getElementById('establishedDetails');
+    const countEl = document.getElementById('establishedCount');
+    if (!establishedList) return;
+    let moved = 0;
+    document.querySelectorAll('#plantList .plant-card').forEach(card => {
+      const plant = card.dataset.plant;
+      if (!PLANT_DATES[plant] || POT_PLANTS.includes(plant)) return;
+      const days = daysSince(PLANT_DATES[plant]);
+      const stage = taperStage(plant, days);
+      if (stage.cls === 'stage-established') {
+        establishedList.appendChild(card);
+        moved++;
+      }
+    });
+    if (countEl) countEl.textContent = moved;
+    if (establishedDetails) establishedDetails.style.display = moved > 0 ? '' : 'none';
+  }
+
+  groupPlantCardsByStage();
   updateAllPlantMeta();
   // Separate from the moisture/rain history entirely — this is its own
   // localStorage store so it survives independent of daily plant checks.
@@ -2418,72 +2521,59 @@
   // type "onetime": becomes "due" once the linked plant hits dueDays old.
   // type "onetime-anytime": no date trigger, just available to check off now.
   // type "recurring": repeatable log (e.g. a pest check) with a re-due window.
+  // Only the two genuinely recurring, plant-specific care items live here now.
+  // They render inline on their own plant card in Moisture Check (see
+  // CARE_TASKS_BY_PLANT/renderPlantInlineCare below), not in a separate tab
+  // \u2014 you're already looking at these cards daily since coontie/blueberries
+  // never leave Active Watering, so that's where the due/not-due signal
+  // belongs. The former one-time pentas/shrimp-plant pinch tasks are gone
+  // entirely \u2014 both were confirmed done (Cameron, 8/27) with no ongoing
+  // value in keeping a permanent "Done" record on display.
   const CARE_TASKS = [
-    { id: 'pentas-pinch', plant: 'pentas', type: 'onetime', dueDays: 21,
-      label: 'Pentas \u2014 first pinch and deadhead pass',
-      detail: 'Tip-pinch new growth to force branching; remove spent blooms.' },
-    { id: 'shrimp-pinch', plant: 'shrimpplant', type: 'onetime', dueDays: 21,
-      label: 'Shrimp Plant \u2014 first pinch and deadhead pass',
-      detail: 'Same approach as pentas \u2014 tip-pinch young growth, deadhead spent bracts.' },
     { id: 'blueberry-flowers', plant: 'blueberries', type: 'recurring', recurDays: 7,
-      label: 'Blueberries \u2014 remove first-season flowers/fruit',
+      label: 'Remove first-season flowers/fruit',
       detail: 'Removing early blooms lets the plant put energy into root establishment instead of fruiting this first year. Log a check even if there\u2019s nothing to remove \u2014 keeps this from sitting flagged when it\u2019s not actually due.' },
     { id: 'coontie-scale', plant: 'coontie', type: 'recurring', recurDays: 30,
-      label: 'Coontie \u2014 scale check',
-      detail: 'Check fronds for cycad scale (small white/waxy insects) \u2014 the main coontie pest in Florida.' }
+      label: 'Scale check',
+      detail: 'Check fronds for cycad scale (small white/waxy insects) \u2014 the main coontie pest in Florida.' },
+    { id: 'frogfruit-trim', plant: 'stumppot', type: 'recurring', recurDays: 7,
+      label: 'Trim Frogfruit',
+      detail: 'Trails over the pot rim fast enough to need a trim about weekly to stay tidy.' }
   ];
 
-  // Ongoing/as-needed items \u2014 no due date logic, just reference notes.
-  const CARE_NOTES = [
-    { label: 'Blue Daze', detail: 'Shear back if it gets leggy/vine-y rather than staying mounded. As-needed, once established \u2014 tolerant of a hard trim.' },
-    { label: 'Monkey Grass Ring', detail: 'Trim ragged/browning tips as needed. Can cut back hard in late winter before the spring flush if it ever looks tired.' },
-    { label: 'Firebush (north side)', detail: 'Light tip-pruning for shape once established \u2014 optional, not urgent, already blooming well.' },
-    { label: 'Firespike Cutting', detail: 'Hold off on any fertilizer until rooting is confirmed (visible new top growth).' }
-  ];
+  // Maps a plant key to its CARE_TASKS id, for renderPlantInlineCare().
+  const CARE_TASKS_BY_PLANT = { blueberries: 'blueberry-flowers', coontie: 'coontie-scale', stumppot: 'frogfruit-trim' };
 
+  // Everything that used to live in CARE_NOTES has a real home now: Blue
+  // Daze/Firebush-north's notes are a .card-care-note on their own card,
+  // Sago's two logs get their own card below (see renderSagoCareInline),
+  // and Monkey Grass Ring \u2014 a no-fixed-interval "trim when it looks
+  // ragged" reminder, not a dated recurring log \u2014 moved to
+  // garden-todo-list.html's Active/Patrol section, which already owns
+  // exactly this kind of as-needed item. Nothing left with no home, so
+  // there's no separate Care Tasks tab anymore.
+
+  // Both remaining CARE_TASKS entries are 'recurring' -- the 'onetime'/
+  // 'onetime-anytime' branches these used to have (and the toggleCareTask()
+  // function that went with them) were removed along with the pinch/deadhead
+  // tasks; nothing in CARE_TASKS uses those types anymore.
   function careStatusHtml(task, rec) {
-    if (task.type === 'onetime') {
-      const days = PLANT_DATES[task.plant] !== undefined ? daysSince(PLANT_DATES[task.plant]) : null;
-      if (rec.done) {
-        const d = new Date(rec.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        return '<span class="care-status done">Done ' + d + '</span>';
-      }
-      if (days !== null && days >= task.dueDays) return '<span class="care-status due">Due now (day ' + days + ')</span>';
-      return '<span class="care-status pending">Day ' + (days === null ? '?' : days) + ' of ' + task.dueDays + '</span>';
-    }
-    if (task.type === 'onetime-anytime') {
-      if (rec.done) {
-        const d = new Date(rec.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        return '<span class="care-status done">Done ' + d + '</span>';
-      }
-      return '<span class="care-status pending">Available now</span>';
-    }
-    if (task.type === 'recurring') {
-      const logs = rec.logs || [];
-      if (logs.length === 0) return '<span class="care-status pending">Never logged</span>';
-      const daysSinceLog = Math.floor((Date.now() - logs[logs.length - 1]) / 86400000);
-      if (daysSinceLog >= task.recurDays) return '<span class="care-status due">Due \u2014 ' + daysSinceLog + ' days since last check</span>';
-      return '<span class="care-status done">Checked ' + daysSinceLog + ' day' + (daysSinceLog === 1 ? '' : 's') + ' ago</span>';
-    }
-    return '';
+    const logs = rec.logs || [];
+    if (logs.length === 0) return '<span class="care-status pending">Never logged</span>';
+    const daysSinceLog = Math.floor((Date.now() - logs[logs.length - 1]) / 86400000);
+    if (daysSinceLog >= task.recurDays) return '<span class="care-status due">Due \u2014 ' + daysSinceLog + ' days since last check</span>';
+    return '<span class="care-status done">Checked ' + daysSinceLog + ' day' + (daysSinceLog === 1 ? '' : 's') + ' ago</span>';
   }
 
   function careBodyExtraHtml(task, rec) {
-    if (task.type === 'onetime' || task.type === 'onetime-anytime') {
-      return '<button class="care-btn' + (rec.done ? ' done-btn' : '') + '" onclick="toggleCareTask(\'' + task.id + '\')">' +
-        (rec.done ? 'Mark not done' : 'Mark done') + '</button>';
+    const logs = rec.logs || [];
+    let html = '<button class="care-btn secondary" onclick="logRecurringCare(\'' + task.id + '\')">Log check now</button>';
+    if (logs.length) {
+      html += '<div class="care-log-list">' + logs.slice(-4).reverse().map(ts =>
+        '<div class="care-log-entry">' + new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + '</div>'
+      ).join('') + '</div>';
     }
-    if (task.type === 'recurring') {
-      const logs = rec.logs || [];
-      let html = '<button class="care-btn secondary" onclick="logRecurringCare(\'' + task.id + '\')">Log check now</button>';
-      if (logs.length) {
-        html += '<div class="care-log-list">' + logs.slice(-4).reverse().map(ts =>
-          '<div class="care-log-entry">' + new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + '</div>'
-        ).join('') + '</div>';
-      }
-      return html;
-    }
-    return '';
+    return html;
   }
 
   const SAGO_KEY = 'gardenSagoCare';
@@ -2527,25 +2617,14 @@
     const state = loadSagoState();
     state.fertilizeLog.push(Date.now());
     saveSagoState(state);
-    renderCareTasks();
-    updateCareDot();
+    renderSagoCareInline();
   }
 
   function logSagoFrondCheck() {
     const state = loadSagoState();
     state.frondCheckLog.push(Date.now());
     saveSagoState(state);
-    renderCareTasks();
-    updateCareDot();
-  }
-
-  function toggleCareTask(id) {
-    const state = loadCareState();
-    const rec = state[id] || {};
-    state[id] = rec.done ? { done: false } : { done: true, completedAt: Date.now() };
-    saveCareState(state);
-    renderCareTasks();
-    updateCareDot();
+    renderSagoCareInline();
   }
 
   function logRecurringCare(id) {
@@ -2555,77 +2634,43 @@
     rec.logs.push(Date.now());
     state[id] = rec;
     saveCareState(state);
-    renderCareTasks();
-    updateCareDot();
+    renderPlantInlineCare();
   }
 
-  // Counts outstanding scheduled tasks: a onetime task once its plant hits
-  // dueDays old, a onetime-anytime task any time it isn't checked off yet,
-  // a recurring task once its re-check window has elapsed (or it's never
-  // been logged at all), plus sago's fertilize and frond-check logs on
-  // their own recurring windows.
-  function careTasksDueCount() {
+  // Renders the two plant-specific recurring care items (blueberries,
+  // coontie) directly onto their own card in Moisture Check, via
+  // CARE_TASKS_BY_PLANT -- see the note above CARE_TASKS for why these
+  // live here instead of the Care Tasks tab. Reuses the same
+  // careStatusHtml()/careBodyExtraHtml() + loadCareState()/logRecurringCare()
+  // as before, just rendered into a different container.
+  function renderPlantInlineCare() {
     const state = loadCareState();
-    let count = 0;
-    CARE_TASKS.forEach(task => {
+    Object.keys(CARE_TASKS_BY_PLANT).forEach(plant => {
+      const container = document.getElementById('cardCare-' + plant);
+      if (!container) return;
+      const task = CARE_TASKS.find(t => t.id === CARE_TASKS_BY_PLANT[plant]);
+      if (!task) return;
       const rec = state[task.id] || {};
-      if (task.type === 'onetime') {
-        const days = PLANT_DATES[task.plant] !== undefined ? daysSince(PLANT_DATES[task.plant]) : null;
-        if (!rec.done && days !== null && days >= task.dueDays) count++;
-      } else if (task.type === 'onetime-anytime') {
-        if (!rec.done) count++;
-      } else if (task.type === 'recurring') {
-        const logs = rec.logs || [];
-        if (logs.length === 0) count++;
-        else {
-          const daysSinceLog = Math.floor((Date.now() - logs[logs.length - 1]) / 86400000);
-          if (daysSinceLog >= task.recurDays) count++;
-        }
-      }
+      container.innerHTML =
+        '<div class="care-item-head"><span class="care-item-title">' + task.label + '</span>' + careStatusHtml(task, rec) + '</div>' +
+        '<div class="care-item-detail">' + task.detail + '</div>' +
+        careBodyExtraHtml(task, rec);
     });
-    const sago = loadSagoState();
-    if (sagoLogIsDue(sago.fertilizeLog, SAGO_FERT_INTERVAL_DAYS)) count++;
-    if (sagoLogIsDue(sago.frondCheckLog, SAGO_FROND_INTERVAL_DAYS)) count++;
-    return count;
   }
 
-  function updateCareDot() {
-    const dot = document.getElementById('careDot');
-    if (!dot) return;
-    dot.style.display = careTasksDueCount() > 0 ? 'block' : 'none';
-  }
+  // Renders Sago's two standalone logs directly into its card in Moisture
+  // Check (see #sagoCareBody in the HTML) -- same status-badge/log-list
+  // markup used before, just a different render target and no more shared
+  // "Care Tasks tab" -- see renderSagoCareInline below.
+  renderPlantInlineCare();
+  renderSagoCareInline();
 
-  updateCareDot();
-
-  function renderCareTasks() {
-    const state = loadCareState();
+  function renderSagoCareInline() {
     const sago = loadSagoState();
-    const app = document.getElementById('careApp');
+    const app = document.getElementById('sagoCareBody');
     if (!app) return;
 
     let html = '';
-
-    html += '<h2 class="section-title">Scheduled Care Tasks</h2>';
-    html += '<div class="card"><div class="card-inner">';
-    CARE_TASKS.forEach(task => {
-      const rec = state[task.id] || {};
-      html += '<div class="care-item">';
-      html += '<div class="care-item-head"><span class="care-item-title">' + task.label + '</span>' + careStatusHtml(task, rec) + '</div>';
-      html += '<div class="care-item-detail">' + task.detail + '</div>';
-      html += careBodyExtraHtml(task, rec);
-      html += '</div>';
-    });
-    html += '</div></div>';
-
-    html += '<h2 class="section-title">Ongoing / As-Needed Notes</h2>';
-    html += '<div class="card"><div class="card-inner">';
-    CARE_NOTES.forEach(note => {
-      html += '<div class="care-item"><div class="care-item-title">' + note.label + '</div><div class="care-item-detail">' + note.detail + '</div></div>';
-    });
-    html += '</div></div>';
-
-    html += '<h2 class="section-title">Sago Palm <span style="text-transform:none;letter-spacing:0;font-weight:400;">(standalone \u2014 not water-tracked)</span></h2>';
-    html += '<div class="card"><div class="card-inner">';
 
     html += '<div class="care-item">';
     html += '<div class="care-item-head"><span class="care-item-title">Fertilizer log</span>' + sagoLogStatusHtml(sago.fertilizeLog, SAGO_FERT_INTERVAL_DAYS) + '</div>';
@@ -2649,11 +2694,71 @@
     }
     html += '</div>';
 
-    html += '</div></div>';
-
     app.innerHTML = html;
   }
 
+
+  // When everything was planted, when it did or will graduate to
+  // established/spot-check status. Pots and capped (rot-risk) plants don't
+  // follow a date curve the same way established status normally works, so
+  // they get their own short groups instead of a projected date -- same
+  // distinction Away Mode/grouping already make. Driven entirely by
+  // PLANT_DATES/TAPER_RULES -- doesn't need any logged history, so it's a
+  // standalone function callable from renderMetrics()'s empty-history path
+  // too (see below), not just once real data exists. Always rendered
+  // uncollapsed since "what's coming up" is meant to be an always-available
+  // reference, not something to dig for.
+  function establishmentCalendarHtml() {
+    let html = '<h2 class="section-title">Establishment Calendar</h2>';
+    html += '<div class="card"><div class="card-inner">';
+    const fmtEstDate = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const calRows = Object.keys(PLANT_DATES).map(plant => {
+      const days = daysSince(PLANT_DATES[plant]);
+      const stage = taperStage(plant, days);
+      const isPot = POT_PLANTS.includes(plant);
+      const isCapped = TAPER_RULES[plant] === 'capped';
+      const estDays = TAPER_RULES[plant] === 'extended' ? FIREBUSH_ESTABLISHED_DAY : 28;
+      const plantedDate = new Date(PLANT_DATES[plant] + 'T00:00:00');
+      const estDate = new Date(plantedDate.getTime() + estDays * 86400000);
+      return { plant, label: PLANT_LABELS[plant] || plant, stage, isPot, isCapped, plantedDate, estDate };
+    });
+    const calUpcoming = calRows.filter(r => !r.isPot && !r.isCapped && r.stage.cls !== 'stage-established')
+      .sort((a, b) => a.estDate - b.estDate);
+    const calEstablished = calRows.filter(r => !r.isPot && !r.isCapped && r.stage.cls === 'stage-established')
+      .sort((a, b) => b.estDate - a.estDate);
+    const calPots = calRows.filter(r => r.isPot);
+    const calCapped = calRows.filter(r => r.isCapped);
+    if (calUpcoming.length) {
+      html += '<div class="results-group-title hold" style="margin-bottom:6px;">Still Establishing (' + calUpcoming.length + ')</div>';
+      calUpcoming.forEach(r => {
+        const daysToGo = Math.ceil((r.estDate - new Date()) / 86400000);
+        // Deliberately NOT r.stage.cls here -- that reuses the same
+        // red/tan/blue/green coloring the RED/GREEN/BLUE probe buttons use
+        // for dry/moist/wet elsewhere in this same app, which would make a
+        // blue date badge here look like it means something about
+        // moisture. One fixed neutral color for every "still establishing"
+        // row instead, since the grouping (this section vs. Established
+        // below) already carries the status -- the color doesn't need to
+        // encode anything further.
+        html += '<div class="taper-row"><div><div class="taper-name">' + r.label + '</div><div class="taper-days">planted ' + fmtEstDate(r.plantedDate) + '</div></div>' +
+          '<div class="taper-stage stage-1x" style="white-space:normal;text-align:right;">~' + fmtEstDate(r.estDate) + (daysToGo > 0 ? ' (' + daysToGo + 'd)' : '') + '</div></div>';
+      });
+    }
+    if (calEstablished.length) {
+      html += '<div class="results-group-title skip" style="margin:14px 0 6px 0;">Established (' + calEstablished.length + ')</div>';
+      calEstablished.forEach(r => {
+        html += '<div class="taper-row"><div class="taper-name">' + r.label + '</div><div class="taper-days">~' + fmtEstDate(r.estDate) + '</div></div>';
+      });
+    }
+    if (calPots.length) {
+      html += '<div class="results-note" style="margin-top:14px;"><strong>Potted (' + calPots.length + '):</strong> ' + calPots.map(r => r.label).join(', ') + ' — dry on their own clock, not date-driven.</div>';
+    }
+    if (calCapped.length) {
+      html += '<div class="results-note"><strong>Manual/rot-risk (' + calCapped.length + '):</strong> ' + calCapped.map(r => r.label).join(', ') + ' — never auto-establishes, stays a judgment call regardless of age.</div>';
+    }
+    html += '</div></div>';
+    return html;
+  }
 
   function renderMetrics() {
     const history = loadHistory();
@@ -2661,10 +2766,11 @@
     const app = document.getElementById('app');
 
     if (history.length === 0 && rainHistory.length === 0) {
-      app.innerHTML =
-        '<div class="empty-state">No history yet. Log a few moisture checks on the main page and hit ' +
+      app.innerHTML = establishmentCalendarHtml() +
+        '<div class="empty-state">No check/rain history yet. Log a few moisture checks on the main page and hit ' +
         '&ldquo;Save &amp; Reset for Next Check&rdquo;, or log rain with &ldquo;Save This Rain Entry&rdquo; ' +
-        '&mdash; patterns will show up here once there\u2019s data to work with.</div>';
+        '&mdash; the rest of this page (Needs Attention, Per-Plant Status, etc.) needs at least some logged ' +
+        'data to work with. The calendar above doesn\u2019t &mdash; it\u2019s driven by planting dates alone.</div>';
       return;
     }
 
@@ -2747,6 +2853,8 @@
       html += attentionLines.join('');
     }
     html += '</div></div>';
+
+    html += establishmentCalendarHtml();
 
     // --- Per-Plant Status: merges the old separate Dryness Rate and Watering
     // Taper Tracker sections into one row per plant, so the full plant roster
@@ -3059,15 +3167,158 @@
     if (ok) flashExportBtn('exportJsonBtn', 'Downloaded');
   }
 
+  // ---- Away Mode ----
+  // Trip-planning view: given a number of days away, projects each plant's
+  // taper stage forward to the return date using the same taperStage()/
+  // PLANT_DATES data driving Active Watering and the Established group, plus
+  // a worst-case (zero rain) projection of the existing Drought Signal
+  // deficit. Nothing hardcoded to one trip -- recomputes live off today's
+  // date every time it renders, so it stays useful for the next trip too.
+
+  const AWAY_DAYS_KEY = 'gardenAwayModeDays';
+
+  function loadAwayDays() {
+    try {
+      const raw = localStorage.getItem(AWAY_DAYS_KEY);
+      const n = raw ? parseInt(raw, 10) : 7;
+      return (Number.isFinite(n) && n > 0) ? n : 7;
+    } catch (e) { return 7; }
+  }
+
+  function saveAwayDays(n) {
+    try { localStorage.setItem(AWAY_DAYS_KEY, String(n)); } catch (e) {}
+  }
+
+  function updateAwayDays(val) {
+    const n = Math.max(1, Math.min(60, parseInt(val, 10) || 7));
+    saveAwayDays(n);
+    renderAwayMode();
+  }
+
+  // Buckets every planted/potted item into needs-a-plan / watered-rarely-by-
+  // design / should-coast-fine, plus a worst-case drought-deficit projection
+  // for the established/EOD-tail group. Shared by the render and the
+  // copy-for-partner text so the two can never drift apart.
+  function computeAwayPlan(days) {
+    const rainHistory = loadRainHistory();
+    const sortedRain = [...rainHistory].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const drought = computeDroughtDeficit(sortedRain);
+    const needsPlan = [], lowWaterByDesign = [], shouldCoast = [];
+    Object.keys(PLANT_DATES).forEach(plant => {
+      const daysNow = daysSince(PLANT_DATES[plant]);
+      const daysAtReturn = daysNow + days;
+      const stageNow = taperStage(plant, daysNow);
+      const stageAtReturn = taperStage(plant, daysAtReturn);
+      const label = PLANT_LABELS[plant] || plant;
+      if (AWAY_LOW_WATER_BY_DESIGN.includes(plant)) { lowWaterByDesign.push(label); return; }
+      if (POT_PLANTS.includes(plant)) {
+        needsPlan.push({ label, why: 'Potted — dries on its own clock regardless of establishment, currently ' + stageNow.label.toLowerCase() + '.' });
+        return;
+      }
+      if (stageAtReturn.cls !== 'stage-established') {
+        needsPlan.push({ label, why: 'Still ' + stageAtReturn.label.toLowerCase() + ' by the time you’re back (day ' + daysAtReturn + ').' });
+        return;
+      }
+      shouldCoast.push(label);
+    });
+    const projectedDeficit = drought.deficitIn + (days * DROUGHT_SIGNAL_DAILY_LOSS_IN);
+    return { needsPlan, lowWaterByDesign, shouldCoast, currentDeficit: drought.deficitIn, projectedDeficit };
+  }
+
+  function renderAwayMode() {
+    const app = document.getElementById('awayApp');
+    if (!app) return;
+    const days = loadAwayDays();
+    const plan = computeAwayPlan(days);
+
+    let html = '';
+    html += '<div class="howto" style="margin:16px 16px 4px 16px;"><div class="t">Away Mode</div>' +
+      '<div style="font-size:13.5px;line-height:1.6;">Set how many days you’ll be gone. Everything below is computed live from planting dates and the same establishment/drought-signal logic used on the other tabs — nothing here is hardcoded to one specific trip.</div></div>';
+
+    html += '<div class="card" style="margin:12px 16px;"><div class="card-inner">';
+    html += '<label style="font-family:\'Helvetica Neue\',Arial,sans-serif;font-size:12px;color:var(--ink-soft);display:block;margin-bottom:6px;">Days away</label>';
+    html += '<input type="number" min="1" max="60" value="' + days + '" oninput="updateAwayDays(this.value)" ' +
+      'style="width:100%;font-size:16px;padding:8px 10px;border-radius:8px;border:1px solid var(--sand);background:var(--sand-light);color:var(--ink);box-sizing:border-box;">';
+    html += '</div></div>';
+
+    html += '<h2 class="section-title">Needs A Plan Before You Go (' + plan.needsPlan.length + ')</h2>';
+    html += '<div class="card"><div class="card-inner">';
+    if (plan.needsPlan.length === 0) {
+      html += '<div class="attention-empty">Nothing currently needs pre-trip arrangements for a ' + days + '-day trip — no pots and nobody still tapering by the return date.</div>';
+    } else {
+      plan.needsPlan.forEach(p => {
+        html += '<div class="risk-alert warn"><strong>' + p.label + '</strong><br>' + p.why + '</div>';
+      });
+    }
+    html += '</div></div>';
+
+    if (plan.projectedDeficit >= DROUGHT_SIGNAL_THRESHOLD_IN) {
+      html += '<h2 class="section-title">Established Group — Drought Projection</h2>';
+      html += '<div class="card"><div class="card-inner">';
+      html += '<div class="risk-alert warn">Worst case (zero rain the whole trip): the established/EOD-tail group’s water-balance deficit would reach ~' + plan.projectedDeficit.toFixed(1) + '" by the time you’re back (currently ~' + plan.currentDeficit.toFixed(1) + '"). Worth a deep soak the day you leave, or asking someone for one mid-trip check if it stays dry.</div>';
+      html += '</div></div>';
+    }
+
+    html += '<h2 class="section-title">Watered Rarely By Design (' + plan.lowWaterByDesign.length + ')</h2>';
+    html += '<div class="card"><div class="card-inner">';
+    html += '<div class="risk-alert ok">' + (plan.lowWaterByDesign.length ? plan.lowWaterByDesign.join(', ') : 'None') + ' — rot-risk plants already on a deliberately sparse manual track. Leaving them alone for the trip is closer to correct care than having someone water them, so these aren’t a concern.</div>';
+    html += '</div></div>';
+
+    html += '<details class="metrics-details"><summary>Should Coast Fine (' + plan.shouldCoast.length + ')</summary>';
+    html += '<div class="card"><div class="card-inner">';
+    html += plan.shouldCoast.length
+      ? '<div class="plant-row-taper" style="padding:4px 0;font-size:13px;">' + plan.shouldCoast.join(', ') + '</div>'
+      : '<div class="attention-empty">Nobody’s reached established status yet.</div>';
+    html += '</div></div></details>';
+
+    html += '<button class="reset-btn" style="background:var(--wet);" onclick="copyAwayPlan()">Copy Away Plan</button>';
+    html += '<div class="quick-log-confirm" id="awayCopyConfirm" style="text-align:center;margin-top:8px;"></div>';
+
+    app.innerHTML = html;
+  }
+
+  function buildAwayShareText(days, plan) {
+    let t = 'Away Plan — ' + days + ' day' + (days === 1 ? '' : 's') + ' (generated ' + shortDateLabel() + ')\n\n';
+    t += 'NEEDS A PLAN BEFORE YOU GO (' + plan.needsPlan.length + ')\n';
+    t += plan.needsPlan.length ? plan.needsPlan.map(p => '- ' + p.label + ': ' + p.why).join('\n') : '- none';
+    t += '\n\n';
+    if (plan.projectedDeficit >= DROUGHT_SIGNAL_THRESHOLD_IN) {
+      t += 'ESTABLISHED GROUP DROUGHT PROJECTION (worst case, zero rain)\n- currently ~' + plan.currentDeficit.toFixed(1) + '", projected ~' + plan.projectedDeficit.toFixed(1) + '" by return — consider a deep soak before leaving.\n\n';
+    }
+    t += 'WATERED RARELY BY DESIGN (' + plan.lowWaterByDesign.length + ')\n';
+    t += plan.lowWaterByDesign.length ? '- ' + plan.lowWaterByDesign.join(', ') : '- none';
+    t += '\n\nSHOULD COAST FINE (' + plan.shouldCoast.length + ')\n';
+    t += plan.shouldCoast.length ? '- ' + plan.shouldCoast.join(', ') : '- none';
+    return t;
+  }
+
+  function copyAwayPlan() {
+    const days = loadAwayDays();
+    const plan = computeAwayPlan(days);
+    const text = buildAwayShareText(days, plan);
+    const el = document.getElementById('awayCopyConfirm');
+    const done = () => {
+      if (!el) return;
+      el.textContent = 'Copied to clipboard';
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+      fallbackCopy(text, done);
+    }
+  }
+
   function showTab(tab) {
     document.getElementById('checkTab').classList.toggle('active', tab === 'check');
     document.getElementById('metricsTab').classList.toggle('active', tab === 'metrics');
-    document.getElementById('careTab').classList.toggle('active', tab === 'care');
+    document.getElementById('awayTab').classList.toggle('active', tab === 'away');
     document.getElementById('tabBtnCheck').classList.toggle('active', tab === 'check');
     document.getElementById('tabBtnMetrics').classList.toggle('active', tab === 'metrics');
-    document.getElementById('tabBtnCare').classList.toggle('active', tab === 'care');
+    document.getElementById('tabBtnAway').classList.toggle('active', tab === 'away');
     if (tab === 'metrics') renderMetrics();
-    if (tab === 'care') renderCareTasks();
+    if (tab === 'away') renderAwayMode();
   }
 </script>
 
