@@ -1021,9 +1021,8 @@
   .care-btn.secondary { background: var(--wet); }
   .care-btn.done-btn { background: var(--bark); }
 
-  .care-log-list { margin-top: 8px; font-size: 11.5px; color: var(--ink-soft); }
-  .care-log-entry { padding: 4px 0; border-top: 1px dashed var(--sand); }
-  .care-log-entry:first-child { border-top: none; }
+  .care-log-list { margin-top: 8px; font-size: 11.5px; color: var(--ink-soft); line-height: 1.5; }
+  .care-log-list .care-log-label { color: var(--ink-soft); }
 
   .rain-stat-row {
     display: flex;
@@ -2560,9 +2559,9 @@
     const logs = rec.logs || [];
     let html = '<button class="care-btn secondary" onclick="logRecurringCare(\'' + task.id + '\')">Log check now</button>';
     if (logs.length) {
-      html += '<div class="care-log-list">' + logs.slice(-4).reverse().map(ts =>
-        '<div class="care-log-entry">' + new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + '</div>'
-      ).join('') + '</div>';
+      html += '<div class="care-log-list"><span class="care-log-label">Last checked: </span>' + logs.slice(-4).reverse().map(ts =>
+        new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      ).join(' · ') + '</div>';
     }
     return html;
   }
@@ -2668,9 +2667,9 @@
     html += '<div class="care-item-detail">Guidance is every 3\u20134 months \u2014 flagged as due around the ' + SAGO_FERT_INTERVAL_DAYS + '-day mark.</div>';
     html += '<button class="care-btn" onclick="logSagoFertilize()">Log fertilizer application</button>';
     if (sago.fertilizeLog.length) {
-      html += '<div class="care-log-list">' + sago.fertilizeLog.slice(-5).reverse().map(ts =>
-        '<div class="care-log-entry">' + new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + '</div>'
-      ).join('') + '</div>';
+      html += '<div class="care-log-list"><span class="care-log-label">Last logged: </span>' + sago.fertilizeLog.slice(-5).reverse().map(ts =>
+        new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      ).join(' · ') + '</div>';
     }
     html += '</div>';
 
@@ -2679,9 +2678,9 @@
     html += '<div class="care-item-detail">Remove fully brown/dead fronds at the base; leave yellowing-but-not-fully-brown fronds alone. Watch for a new frond flush as the sign the fertilizer is working \u2014 flagged every ' + SAGO_FROND_INTERVAL_DAYS + ' days.</div>';
     html += '<button class="care-btn secondary" onclick="logSagoFrondCheck()">Log frond check</button>';
     if (sago.frondCheckLog.length) {
-      html += '<div class="care-log-list">' + sago.frondCheckLog.slice(-5).reverse().map(ts =>
-        '<div class="care-log-entry">' + new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + '</div>'
-      ).join('') + '</div>';
+      html += '<div class="care-log-list"><span class="care-log-label">Last logged: </span>' + sago.frondCheckLog.slice(-5).reverse().map(ts =>
+        new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      ).join(' · ') + '</div>';
     }
     html += '</div>';
 
